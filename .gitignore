@@ -1,0 +1,108 @@
+# ==============================================================================
+# Byte-compiled / optimized / DLL files
+# ==============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# ==============================================================================
+# Distribution / packaging
+# ==============================================================================
+bin/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller (usually written by a script to inject dates/infos)
+*.manifest
+*.spec
+
+# ==============================================================================
+# Installer logs
+# ==============================================================================
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ==============================================================================
+# Unit test / coverage reports
+# ==============================================================================
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# ==============================================================================
+# Environments and Virtual Environments
+# ==============================================================================
+# Common local directory names
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+NextGenForge/
+
+# Poetry, Pipenv, and Conda artifacts
+.pypoetry/
+.pipenv/
+# NOTE: It is recommended to keep Pipfile.lock and poetry.lock committed 
+# to ensure reproducible environments across machines.
+
+# ==============================================================================
+# Jupyter Notebooks
+# ==============================================================================
+.ipynb_checkpoints
+
+# ==============================================================================
+# IDEs and Text Editors
+# ==============================================================================
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# PyCharm / JetBrains
+.idea/
+
+# macOS system files
+.DS_Store
+
+# ==============================================================================
+# Extra
+# ==============================================================================
+
+bin/
+lib/
+include/
+etc/
+share/
+pyvenv.cfg
+*.pdf
