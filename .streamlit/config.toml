@@ -1,0 +1,16 @@
+[theme]
+primaryColor = "#065dff"
+backgroundColor = "#0E1117"
+secondaryBackgroundColor = "#1E2530"
+textColor = "#FAFAFA"
+font = "Inter"
+
+[server]
+runOnSave = true
+
+[browser]
+gatherUsageStats = false
+
+[client]
+showErrorDetails = "none"
+showWarningOnDirectExecution = true

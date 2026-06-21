@@ -106,3 +106,4 @@ etc/
 share/
 pyvenv.cfg
 *.pdf
+*.db

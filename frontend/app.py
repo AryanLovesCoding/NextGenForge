@@ -56,7 +56,7 @@ elif st.session_state.step == 2:
     "---"
     if "Other" in user_subjects:
         custom_subject = st.text_input("Please specify your subject")
-    user_marks = st.slider("Select academic performance range:", 0, 100, (75, 90))
+    user_marks = st.slider("Select academic performance range:*", 0, 100, (75, 90))
     "---"
     if st.button('Next'):
         #Error handling
@@ -76,7 +76,7 @@ elif st.session_state.step == 2:
 elif st.session_state.step == 3:
     st.subheader("Career Aspirations")
     st.caption("Type a keyword, press tab when it shows up, and press enter to add it. Add up to 5 aspirations.")
-    user_keywords = keywords = st_tags(label='Enter Keywords:',text='Press enter to add more',
+    user_keywords = keywords = st_tags(label='Enter Keywords:*',text='Press enter to add more',
                                        suggestions=[
                                                     'Doctor', 'Engineer', 'Lawyer', 'Designer', 'Data Scientist',
                                                     'Entrepreneur', 'Teacher', 'Architect', 'Chartered Accountant',
