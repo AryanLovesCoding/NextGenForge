@@ -15,7 +15,8 @@ if st.session_state.step == 1:
     "---"
     user_grade = st.selectbox("Which class are you in?*", ["9","10","11","12"], index=None)
     "---"
-    if st.button('Next'):
+    left, m1, m2, m3, m4, m5, m6, m7, right = st.columns(9)
+    if right.button('Next'):
         #Error handling
         if not user_name or not user_city or user_grade is None:
             st.error("Please fill in all fields before proceeding.")
@@ -58,7 +59,11 @@ elif st.session_state.step == 2:
         custom_subject = st.text_input("Please specify your subject")
     user_marks = st.slider("Select academic performance range:*", 0, 100, (75, 90))
     "---"
-    if st.button('Next'):
+    left, m1, m2, m3, m4, m5, m6, m7, right = st.columns(9)
+    if left.button('Back'):
+        st.session_state.step -= 1
+        st.rerun()
+    if right.button('Next'):
         #Error handling
         if not user_stream or len(user_subjects) == 0:
             st.error("Please fill in all fields before proceeding.")
@@ -70,13 +75,13 @@ elif st.session_state.step == 2:
             st.session_state.custom = custom_subject
             st.session_state.marks = user_marks
             st.session_state.step += 1
-            st.rerun()  
+            st.rerun()
 
 # Keywords
 elif st.session_state.step == 3:
     st.subheader("Career Aspirations")
     st.caption("Type a keyword, press tab when it shows up, and press enter to add it. Add up to 5 aspirations.")
-    user_keywords = keywords = st_tags(label='Enter Keywords:*',text='Press enter to add more',
+    user_keywords = keywords = st_tags(label='Enter Keywords:*', text='Press enter to add more',
                                        suggestions=[
                                                     'Doctor', 'Engineer', 'Lawyer', 'Designer', 'Data Scientist',
                                                     'Entrepreneur', 'Teacher', 'Architect', 'Chartered Accountant',
@@ -86,9 +91,14 @@ elif st.session_state.step == 3:
                                                     'Software Developer', 'Cybersecurity', 'AI Engineer', 'Nurse',
                                                     'Pharmacist', 'Dentist', 'Surgeon', 'Economist', 'Social Worker',
                                                     'Politician', 'Army Officer', 'Navy Officer', 'Air Force Officer',
-                                                    'Fashion Designer', 'Interior Designer', 'Athlete', 'Coach'],maxtags=5)
+                                                    'Fashion Designer', 'Interior Designer', 'Athlete', 'Coach'],
+                                       maxtags=5)
     "---"
-    if st.button('Next'):
+    left, m1, m2, m3, m4, m5, right = st.columns(7)
+    if left.button('Back'):
+        st.session_state.step -= 1
+        st.rerun()
+    if right.button('Submit'):
         #Error handling
         invalid_keyword = any(not key.replace(" ", "").isalpha() for key in user_keywords)
         if invalid_keyword:
@@ -114,3 +124,8 @@ elif st.session_state.step == 4:
                 (", ".join(st.session_state.keywords))]
     }
     st.dataframe(user_information, hide_index=True)
+    "---"
+    left, m1, m2, m3, m4, m5, m6, m7, right = st.columns(9)
+    if left.button('Back'):
+        st.session_state.step -= 1
+        st.rerun()

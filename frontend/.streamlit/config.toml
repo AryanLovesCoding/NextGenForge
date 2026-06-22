@@ -3,7 +3,7 @@ primaryColor = "#065dff"
 backgroundColor = "#0E1117"
 secondaryBackgroundColor = "#1E2530"
 textColor = "#FAFAFA"
-font = "Inter"
+font = "sans serif"
 
 [server]
 runOnSave = true
@@ -13,4 +13,3 @@ gatherUsageStats = false
 
 [client]
 showErrorDetails = "none"
-showWarningOnDirectExecution = true
