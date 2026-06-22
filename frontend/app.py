@@ -1,8 +1,12 @@
-import streamlit as st
-from streamlit_tags import st_tags
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from streamlit_tags import st_tags
+from backend.services.student_services import create_student
+from backend.services.assessment import assessment_scores, calculate_scores
+from backend.schemas.student import StudentCreate
+from backend.services.assessment import calculate_scores
+import streamlit as st
 from data.questions import questions
 from backend.services.assessment import calculate_scores
 from assessment_styles import render_question, render_results, render_welcome
@@ -71,6 +75,15 @@ elif st.session_state.step == 2:
             st.session_state.name = user_name
             st.session_state.city = user_city
             st.session_state.grade = user_grade
+            student_id = create_student(StudentCreate(
+            name=user_name,
+            city=user_city,
+            stream_preference="",
+            interests=[],
+            academic_level=""
+            ))
+            st.session_state.student_id = student_id
+            assessment_scores(student_id, st.session_state.assessment_scores)
             st.session_state.step += 1
             st.rerun()
 

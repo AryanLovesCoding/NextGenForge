@@ -41,6 +41,20 @@ def create_tables():
         )
     """)
 
+#Assessment Scores table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS AssessmentScores (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id INTEGER,
+            stem_score REAL,
+            commerce_score REAL,
+            humanities_score REAL,
+            creative_score REAL,
+            created_at TEXT,
+            FOREIGN KEY (student_id) REFERENCES Student(id)
+        )
+    """)
+
     conn.commit()
     conn.close()
 #Checking message
