@@ -1,12 +1,53 @@
 import streamlit as st
 from streamlit_tags import st_tags
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from data.questions import questions
+from backend.services.assessment import calculate_scores
+from assessment_styles import render_question, render_results, render_welcome
 
-#Initialising session state 
+#Initialising session states
 if 'step' not in st.session_state:
     st.session_state.step = 1
 
-# Personal info form
+if 'question_num' not in st.session_state:
+    st.session_state.question_num = 0
+
+if 'responses' not in st.session_state:
+    st.session_state.responses = []
+
+if 'assessment_started' not in st.session_state:
+    st.session_state.assessment_started = False
+
+if 'assessment_scores' not in st.session_state:
+    st.session_state.assessment_scores = {}
+
+if 'assessment_complete' not in st.session_state:
+    st.session_state.assessment_complete = False
+
+# Assessment questions form for insight on interests
 if st.session_state.step == 1:
+    if st.session_state.question_num == 20 and st.session_state.assessment_complete:
+        st.header("         Thanks!")
+        st.subheader("Please fill the following forms to help us personalise your career guidance.")
+        col1, col2, col3 = st.columns([3, 2, 3])
+        with col2:
+            if st.button("Start →", use_container_width=True):
+                st.session_state.step += 1
+                st.rerun()
+        st.stop()
+    elif st.session_state.question_num == 20:
+        render_results()
+        st.stop()
+    elif not st.session_state.assessment_started:
+        render_welcome()
+        st.stop()
+    else:
+        render_question(st.session_state.question_num)
+
+# Personal info form
+elif st.session_state.step == 2:
     st.subheader("Personal information")
     st.caption("Please fill in all your personal information.")
     user_name = st.text_input(label="Enter full name*")
@@ -34,7 +75,7 @@ if st.session_state.step == 1:
             st.rerun()
 
 # Academic profile form
-elif st.session_state.step == 2:
+elif st.session_state.step == 3:
     st.subheader("Academic profile")
     st.caption("Please fill in all details in regard to your academic profile.")
     user_subjects = []
@@ -78,7 +119,7 @@ elif st.session_state.step == 2:
             st.rerun()
 
 # Keywords
-elif st.session_state.step == 3:
+elif st.session_state.step == 4:
     st.subheader("Career Aspirations")
     st.caption("Type a keyword, press tab when it shows up, and press enter to add it. Add up to 5 aspirations.")
     user_keywords = keywords = st_tags(label='Enter Keywords:*', text='Press enter to add more',
@@ -113,7 +154,7 @@ elif st.session_state.step == 3:
             st.rerun()
 
 # Confirmation screen
-elif st.session_state.step == 4:
+elif st.session_state.step == 5:
     st.subheader("Summary")
     st.badge("Received the following information", icon=":material/check:", color="green")
     user_information = {
