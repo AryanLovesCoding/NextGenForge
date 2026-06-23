@@ -11,6 +11,7 @@ import streamlit as st
 from data.questions import questions
 from backend.services.assessment import calculate_scores
 from assessment_styles import render_question, render_results, render_welcome
+from recommendation_ui import render_stream_recommendation
 
 API_BASE_URL = "http://127.0.0.1:8000"
 
@@ -187,7 +188,7 @@ elif st.session_state.step == 5:
         st.session_state.step -= 1
         st.rerun()
     elif right.button('Next'):
-        st.ession_state.step += 1
+        st.session_state.step += 1
         st.rerun()
 
 #Google Gemini stream recommendation display
@@ -204,6 +205,6 @@ elif st.session_state.step == 6:
         st.subheader(f"Justification:")
         st.markdown(f"Suggested stream: {res['justification']}")
         if res['alternative_stream']:
-            st.subheader(f"Alternative stream: {res['alternative_stream']}")
+           st.subheader(f"Alternative stream: {res['alternative_stream']}")
     else:
-        st.error("Could not get recommendation. Please try again.")
+       st.error("Could not get recommendation. Please try again.")
