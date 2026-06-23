@@ -1,5 +1,6 @@
 import sys
 import os
+import requests
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from streamlit_tags import st_tags
 from backend.services.student_services import create_student
@@ -10,6 +11,8 @@ import streamlit as st
 from data.questions import questions
 from backend.services.assessment import calculate_scores
 from assessment_styles import render_question, render_results, render_welcome
+
+API_BASE_URL = "http://127.0.0.1:8000"
 
 #Initialising session states
 if 'step' not in st.session_state:
@@ -183,3 +186,24 @@ elif st.session_state.step == 5:
     if left.button('Back'):
         st.session_state.step -= 1
         st.rerun()
+    elif right.button('Next'):
+        st.ession_state.step += 1
+        st.rerun()
+
+#Google Gemini stream recommendation display
+elif st.session_state.step == 6:
+    payload = {
+    "scores": st.session_state.assessment_scores,
+    "academic_level": f"{st.session_state.marks[0]}-{st.session_state.marks[1]}",
+    "keywords": st.session_state.keywords
+    }
+    response = requests.post(f"{API_BASE_URL}/api/recommend/stream", json = payload)
+    if response.status_code == 200:
+        res = response.json()
+        st.header(f"Suggested stream: {res['recommended_stream']}")
+        st.subheader(f"Justification:")
+        st.markdown(f"Suggested stream: {res['justification']}")
+        if res['alternative_stream']:
+            st.subheader(f"Alternative stream: {res['alternative_stream']}")
+    else:
+        st.error("Could not get recommendation. Please try again.")
