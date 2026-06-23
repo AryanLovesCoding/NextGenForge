@@ -37,7 +37,7 @@ if 'assessment_complete' not in st.session_state:
 # Assessment questions form for insight on interests
 if st.session_state.step == 1:
     if st.session_state.question_num == 20 and st.session_state.assessment_complete:
-        st.header("         Thanks!")
+        st.header("Thanks!")
         st.subheader("Please fill the following forms to help us personalise your career guidance.")
         col1, col2, col3 = st.columns([3, 2, 3])
         with col2:
@@ -202,9 +202,48 @@ elif st.session_state.step == 6:
     if response.status_code == 200:
         res = response.json()
         st.header(f"Suggested stream: {res['recommended_stream']}")
-        st.subheader(f"Justification:")
+        st.subheader("Justification:")
         st.markdown(f"Suggested stream: {res['justification']}")
         if res['alternative_stream']:
            st.subheader(f"Alternative stream: {res['alternative_stream']}")
     else:
        st.error("Could not get recommendation. Please try again.")
+    left, m1, m2, m3, m4, m5, m6, m7, right = st.columns(9)
+    if left.button('Back'):
+        st.session_state.step -= 1
+        st.rerun()
+    elif right.button('Next'):
+        st.session_state.step += 1
+        st.rerun()
+
+#Google Gemini degree recommendation
+elif st.session_state.step == 7:
+    response = requests.get(f"{API_BASE_URL}/api/recommend/degrees/{st.session_state.student_id}")
+    if response.status_code == 200:
+        res = response.json()
+        st.header("Recommended Degrees")
+        for degree in res['degrees']:
+            with st.expander(degree['degree_name']):
+                # description
+                st.subheader("Description:")
+                st.makrdown(f"{degree['description']}")
+                # career pathways
+                st.subheader("Career pathways:")
+                st.markdown(", ".join(degree['career_pathways']))
+                # entrance exams
+                st.subheader("Extrance exams:")
+                st.markdown(", ".join(degree['entrance_exams']))
+                #timeline
+                st.subheader("Timeline:")
+                st.markdown(f"{degree['timeline']}")
+    else:
+        st.error("Could not get recommendations. Please try again.")
+    
+    "---"
+    left, m1, m2, m3, m4, m5, m6, m7, right = st.columns(9)
+    if left.button('Back', key='back_7'):
+        st.session_state.step -= 1
+        st.rerun()
+    if right.button('Next', key='next_7'):
+        st.session_state.step += 1
+        st.rerun()

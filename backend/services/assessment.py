@@ -26,5 +26,20 @@ def assessment_scores(student_id:int, scores):
     cursor.execute(sql, values)
     conn.commit()
     conn.close()
+
+def get_assessment_scores(student_id: int):
+    conn = connect_to_database()
+    cursor = conn.cursor()
+    sql = """SELECT * FROM AssessmentScores WHERE student_id = ?"""
+    cursor.execute(sql, (student_id,))
+    result = cursor.fetchone()
+    conn.close()
+    return {
+    "STEM": result[2],
+    "Commerce": result[3],
+    "Humanities": result[4],
+    "Design/Creative Arts": result[5]
+    }
+
     
             

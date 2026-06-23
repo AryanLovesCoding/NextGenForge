@@ -7,3 +7,18 @@ class StreamRecommendationRequest(BaseModel):
 
 class StreamRecommendationResponse(BaseModel):
     response: str 
+
+class DegreeItem(BaseModel):
+    degree_name: str
+    description: str
+    career_pathways: list[str]
+    entrance_exams: list[str]
+    timeline: str
+
+class DegreeRecommendationRequest(BaseModel):
+    scores: dict
+    interests: list
+    stream: str
+
+class DegreeRecommendationResponse(BaseModel):
+    degrees: list[DegreeItem]

@@ -24,3 +24,22 @@ def get_stream_recommendation(scores: dict, academic_level: str, keywords: list)
         return json.loads(response.text)
     except json.JSONDecodeError:
         raise ValueError(f"Invalid JSON response from Gemini: {response.text}")
+    
+def get_degree_recommendation(stream: str, interests: list, scores: dict):
+    client = genai.Client(api_key=api_key)
+
+    json_structure = '{"degrees": [{"degree_name": "most preferable degree for the student", "description": "comprehensive description of what the degree is and what it entails", "career_pathways": ["career 1", "career 2", "career 3"], "entrance_exams": ["exam 1", "exam 2", "exam 3"], "timeline": "complete career timeline including degree duration and time to first job"}, {"degree_name": "...", "description": "...", "career_pathways": ["...", "...", "..."], "entrance_exams": ["...", "...", "..."], "timeline": "..."}, {"degree_name": "...", "description": "...", "career_pathways": ["...", "...", "..."], "entrance_exams": ["...", "...", "..."], "timeline": "..."}, {"degree_name": "...", "description": "...", "career_pathways": ["...", "...", "..."], "entrance_exams": ["...", "...", "..."], "timeline": "..."}, {"degree_name": "...", "description": "...", "career_pathways": ["...", "...", "..."], "entrance_exams": ["...", "...", "..."], "timeline": "..."}]}'
+
+    prompt = f"You are a college counsellor helping students understand which degree is best for them. The student has filled out a form and is interested in {stream}. The student has taken an interests assessment and gotten the following results: {scores}, where each score is normalised between 0 and 1 and 1 indicates the strongest interest in that domain. Additionally, in the form they have also mentioned their interests, take those into account: {interests}. Respond ONLY with a JSON object with no additional text, no markdown, no backticks, using this exact structure: {json_structure}"
+
+    response = client.models.generate_content(
+        model="gemini-2.0-flash-lite",
+        contents=prompt
+    )
+    
+    if not response.text:
+        raise ValueError("Empty response from Gemini")
+    try:
+        return json.loads(response.text)
+    except json.JSONDecodeError:
+        raise ValueError(f"Invalid JSON response from Gemini: {response.text}")
