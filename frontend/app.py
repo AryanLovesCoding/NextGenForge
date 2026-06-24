@@ -36,6 +36,9 @@ if 'assessment_scores' not in st.session_state:
 if 'assessment_complete' not in st.session_state:
     st.session_state.assessment_complete = False
 
+if 'chat_history' not in st.session_state:
+    st.session_state.chat_history = {}
+
 # Welcome page
 if not st.session_state.welcome_done:
     st.markdown("""
@@ -278,6 +281,7 @@ elif st.session_state.step == 7:
         st.session_state.step += 1
         st.rerun()
 
+# AI ChatBot
 elif st.session_state.step == 8:
     for message in st.session_state.chat_history:
         with st.chat_message(message["role"]):
@@ -304,10 +308,10 @@ elif st.session_state.step == 8:
         st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
     "---"
     left, m1, m2, m3, m4, m5, m6, m7, right = st.columns(9)
-    if left.button('Back', key='back_7'):
+    if left.button('Back'):
         st.session_state.step -= 1
         st.rerun()
-    if right.button('Next', key='next_7'):
+    if right.button('Next'):
         st.session_state.step += 1
         st.rerun()
     
