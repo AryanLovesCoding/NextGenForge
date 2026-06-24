@@ -3,7 +3,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from data.questions import questions
-from backend.services.assessment import calculate_scores
+from backend.services.assessment import calculate_scores, assessment_scores
 
 CARD_COLORS = [
     ("#E6F1FB", "#0C447C"),
@@ -14,21 +14,6 @@ CARD_COLORS = [
     ("#EAF3DE", "#27500A"),
     ("#FAECE7", "#712B13"),
 ]
-
-def render_welcome():
-    st.markdown("""
-    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 4rem 2rem; text-align:center;">
-        <h1 style="font-size:3rem; font-weight:700; margin-bottom:1rem; color:var(--color-text-primary);">Welcome!</h1>
-        <p style="font-size:1.2rem; color:var(--color-text-secondary); max-width:600px; line-height:1.8;">
-            Please answer these 20 questions to help us understand which domain interests you the most.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-    col1, col2, col3 = st.columns([3, 2, 3])
-    with col2:
-        if st.button("Start →", use_container_width=True):
-            st.session_state.assessment_started = True
-            st.rerun()
 
 def render_question(question_num):
     q = questions[question_num]
@@ -73,10 +58,19 @@ def render_question(question_num):
                 st.rerun()
 
 def render_results():
-    st.session_state.assessment_scores = calculate_scores(st.session_state.responses)
+    scores = calculate_scores(st.session_state.responses)
+    st.session_state.assessment_scores = scores
+    # Save assessment scores to database
+    assessment_scores(st.session_state.student_id, scores)
     st.subheader("Your Interest Profile")
     st.caption("Here's how your interests are distributed across different domains.")
-    st.bar_chart(calculate_scores(st.session_state.responses), horizontal=True, height=400)
+    short_scores = {
+        "STEM": scores["STEM"],
+        "Commerce": scores["Commerce"],
+        "Humanities": scores["Humanities"],
+        "Creative": scores["Design/Creative Arts"]
+    }
+    st.bar_chart(short_scores, horizontal=True, height=400)
     st.markdown("<br>", unsafe_allow_html=True)
     left, m1, m2, m3, m4, m5, m6, m7, right = st.columns(9)
     if right.button('Next'):

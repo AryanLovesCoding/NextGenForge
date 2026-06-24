@@ -5,12 +5,11 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from streamlit_tags import st_tags
 from backend.services.student_services import create_student
 from backend.services.assessment import assessment_scores, calculate_scores
+from backend.services.gemini_services import get_chat_response
 from backend.schemas.student import StudentCreate
-from backend.services.assessment import calculate_scores
 import streamlit as st
 from data.questions import questions
-from backend.services.assessment import calculate_scores
-from assessment_styles import render_question, render_results, render_welcome
+from assessment_styles import render_question, render_results
 from recommendation_ui import render_stream_recommendation
 
 API_BASE_URL = "http://127.0.0.1:8000"
@@ -19,14 +18,17 @@ API_BASE_URL = "http://127.0.0.1:8000"
 if 'step' not in st.session_state:
     st.session_state.step = 1
 
+if 'welcome_done' not in st.session_state:
+    st.session_state.welcome_done = False
+
+if 'assessment_intro_done' not in st.session_state:
+    st.session_state.assessment_intro_done = False
+
 if 'question_num' not in st.session_state:
     st.session_state.question_num = 0
 
 if 'responses' not in st.session_state:
     st.session_state.responses = []
-
-if 'assessment_started' not in st.session_state:
-    st.session_state.assessment_started = False
 
 if 'assessment_scores' not in st.session_state:
     st.session_state.assessment_scores = {}
@@ -34,28 +36,25 @@ if 'assessment_scores' not in st.session_state:
 if 'assessment_complete' not in st.session_state:
     st.session_state.assessment_complete = False
 
-# Assessment questions form for insight on interests
-if st.session_state.step == 1:
-    if st.session_state.question_num == 20 and st.session_state.assessment_complete:
-        st.header("Thanks!")
-        st.subheader("Please fill the following forms to help us personalise your career guidance.")
-        col1, col2, col3 = st.columns([3, 2, 3])
-        with col2:
-            if st.button("Start →", use_container_width=True):
-                st.session_state.step += 1
-                st.rerun()
-        st.stop()
-    elif st.session_state.question_num == 20:
-        render_results()
-        st.stop()
-    elif not st.session_state.assessment_started:
-        render_welcome()
-        st.stop()
-    else:
-        render_question(st.session_state.question_num)
+# Welcome page
+if not st.session_state.welcome_done:
+    st.markdown("""
+    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 4rem 2rem; text-align:center;">
+        <h1 style="font-size:3rem; font-weight:700; margin-bottom:1rem;">Welcome!</h1>
+        <p style="font-size:1.2rem; color:#A0AEC0; max-width:600px; line-height:1.8;">
+            Please fill in the following forms to help us know you better and personalise your career guidance.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([3, 2, 3])
+    with col2:
+        if st.button("Get Started →", use_container_width=True):
+            st.session_state.welcome_done = True
+            st.rerun()
+    st.stop()
 
-# Personal info form
-elif st.session_state.step == 2:
+# Personal information form
+if st.session_state.step == 1:
     st.subheader("Personal information")
     st.caption("Please fill in all your personal information.")
     user_name = st.text_input(label="Enter full name*")
@@ -80,19 +79,18 @@ elif st.session_state.step == 2:
             st.session_state.city = user_city
             st.session_state.grade = user_grade
             student_id = create_student(StudentCreate(
-            name=user_name,
-            city=user_city,
-            stream_preference="",
-            interests=[],
-            academic_level=""
+                name=user_name,
+                city=user_city,
+                stream_preference="",
+                interests=[],
+                academic_level=""
             ))
             st.session_state.student_id = student_id
-            assessment_scores(student_id, st.session_state.assessment_scores)
             st.session_state.step += 1
             st.rerun()
 
 # Academic profile form
-elif st.session_state.step == 3:
+elif st.session_state.step == 2:
     st.subheader("Academic profile")
     st.caption("Please fill in all details in regard to your academic profile.")
     user_subjects = []
@@ -135,8 +133,8 @@ elif st.session_state.step == 3:
             st.session_state.step += 1
             st.rerun()
 
-# Keywords
-elif st.session_state.step == 4:
+# Keywords form
+elif st.session_state.step == 3:
     st.subheader("Career Aspirations")
     st.caption("Type a keyword, press tab when it shows up, and press enter to add it. Add up to 5 aspirations.")
     user_keywords = keywords = st_tags(label='Enter Keywords:*', text='Press enter to add more',
@@ -171,7 +169,7 @@ elif st.session_state.step == 4:
             st.rerun()
 
 # Confirmation screen
-elif st.session_state.step == 5:
+elif st.session_state.step == 4:
     st.subheader("Summary")
     st.badge("Received the following information", icon=":material/check:", color="green")
     user_information = {
@@ -191,32 +189,69 @@ elif st.session_state.step == 5:
         st.session_state.step += 1
         st.rerun()
 
-#Google Gemini stream recommendation display
+# Assessment page
+elif st.session_state.step == 5:
+    if not st.session_state.assessment_intro_done:
+        st.markdown("""
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 4rem 2rem; text-align:center;">
+            <h1 style="font-size:3rem; font-weight:700; margin-bottom:1rem;">Almost there!</h1>
+            <p style="font-size:1.2rem; color:#A0AEC0; max-width:600px; line-height:1.8;">
+                Please answer the following questions to help us personalise your guidance.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        col1, col2, col3 = st.columns([3, 2, 3])
+        with col2:
+            if st.button("Start →", use_container_width=True):
+                st.session_state.assessment_intro_done = True
+                st.rerun()
+        st.stop()
+
+    # Assessment complete - transition page
+    if st.session_state.question_num == 20 and st.session_state.assessment_complete:
+        st.markdown("""
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 4rem 2rem; text-align:center;">
+            <h1 style="font-size:3rem; font-weight:700; margin-bottom:1rem;">Thank you!</h1>
+            <p style="font-size:1.2rem; color:#A0AEC0; max-width:600px; line-height:1.8;">
+                Here is your career guidance based on your profile and assessment.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        col1, col2, col3 = st.columns([3, 2, 3])
+        with col2:
+            if st.button("Continue →", use_container_width=True):
+                st.session_state.step += 1
+                st.rerun()
+        st.stop()
+    elif st.session_state.question_num == 20:
+        render_results()
+        st.stop()
+    else:
+        render_question(st.session_state.question_num)
+
+# Google Gemini stream recommendation
 elif st.session_state.step == 6:
     payload = {
-    "scores": st.session_state.assessment_scores,
-    "academic_level": f"{st.session_state.marks[0]}-{st.session_state.marks[1]}",
-    "keywords": st.session_state.keywords
+        "scores": st.session_state.assessment_scores,
+        "academic_level": f"{st.session_state.marks[0]}-{st.session_state.marks[1]}",
+        "keywords": st.session_state.keywords
     }
-    response = requests.post(f"{API_BASE_URL}/api/recommend/stream", json = payload)
+    response = requests.post(f"{API_BASE_URL}/api/recommend/stream", json=payload)
     if response.status_code == 200:
         res = response.json()
-        st.header(f"Suggested stream: {res['recommended_stream']}")
-        st.subheader("Justification:")
-        st.markdown(f"Suggested stream: {res['justification']}")
-        if res['alternative_stream']:
-           st.subheader(f"Alternative stream: {res['alternative_stream']}")
+        render_stream_recommendation(res)
     else:
-       st.error("Could not get recommendation. Please try again.")
+        st.error("Could not get recommendation. Please try again.")
+    "---"
     left, m1, m2, m3, m4, m5, m6, m7, right = st.columns(9)
     if left.button('Back'):
         st.session_state.step -= 1
         st.rerun()
-    elif right.button('Next'):
+    if right.button('Next'):
         st.session_state.step += 1
         st.rerun()
 
-#Google Gemini degree recommendation
+# Google Gemini degree recommendation
 elif st.session_state.step == 7:
     response = requests.get(f"{API_BASE_URL}/api/recommend/degrees/{st.session_state.student_id}")
     if response.status_code == 200:
@@ -224,21 +259,49 @@ elif st.session_state.step == 7:
         st.header("Recommended Degrees")
         for degree in res['degrees']:
             with st.expander(degree['degree_name']):
-                # description
                 st.subheader("Description:")
-                st.makrdown(f"{degree['description']}")
-                # career pathways
-                st.subheader("Career pathways:")
+                st.markdown(degree['description'])
+                st.subheader("Career Pathways:")
                 st.markdown(", ".join(degree['career_pathways']))
-                # entrance exams
-                st.subheader("Extrance exams:")
+                st.subheader("Entrance Exams:")
                 st.markdown(", ".join(degree['entrance_exams']))
-                #timeline
                 st.subheader("Timeline:")
-                st.markdown(f"{degree['timeline']}")
+                st.markdown(degree['timeline'])
     else:
         st.error("Could not get recommendations. Please try again.")
-    
+    "---"
+    left, m1, m2, m3, m4, m5, m6, m7, right = st.columns(9)
+    if left.button('Back'):
+        st.session_state.step -= 1
+        st.rerun()
+    if right.button('Next'):
+        st.session_state.step += 1
+        st.rerun()
+
+elif st.session_state.step == 8:
+    for message in st.session_state.chat_history:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+    user_input = st.chat_input("Ask me anything about your career...")
+    if user_input:
+        st.chat_message("user").write(user_input)
+        student_context = {"stream": st.session_state.stream, "subjects": st.session_state.subjects,
+                           "marks": st.session_state.marks, "keywords": st.session_state.keywords,
+                           "scores": st.session_state.assessment_scores
+        }
+        payload = {
+            "message": user_input,
+            "chat_history": st.session_state.chat_history,
+            "student_context": student_context
+        }
+        response = requests.post(f"{API_BASE_URL}/api/chat", json=payload)
+        if response.status_code == 200:
+            ai_response = response.json()["response"]
+        else:
+            ai_response = "Sorry, I couldn't process your request. Please try again."
+        st.chat_message("assistant").write(ai_response)
+        st.session_state.chat_history.append({"role": "user", "content": user_input})
+        st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
     "---"
     left, m1, m2, m3, m4, m5, m6, m7, right = st.columns(9)
     if left.button('Back', key='back_7'):
@@ -247,3 +310,4 @@ elif st.session_state.step == 7:
     if right.button('Next', key='next_7'):
         st.session_state.step += 1
         st.rerun()
+    

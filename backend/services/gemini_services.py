@@ -43,3 +43,28 @@ def get_degree_recommendation(stream: str, interests: list, scores: dict):
         return json.loads(response.text)
     except json.JSONDecodeError:
         raise ValueError(f"Invalid JSON response from Gemini: {response.text}")
+    
+def get_chat_response(message: str, chat_history: list[dict], student_context: dict):
+    client = genai.Client(api_key=api_key)
+    prompt = f"""You are a warm and knowledgeable career counsellor helping a student navigate their higher education and career choices. 
+
+        Student profile:
+        - Stream preference: {student_context.get('stream', 'Not specified')}
+        - Subjects: {student_context.get('subjects', 'Not specified')}
+        - Academic performance: {student_context.get('marks', 'Not specified')}%
+        - Career aspirations: {student_context.get('keywords', 'Not specified')}
+        - Interest profile scores: {student_context.get('scores', 'Not specified')}
+
+        Conversation so far: {chat_history}
+
+        Student's current question: {message}
+
+        Answer the student's question in a warm, helpful, and conversational tone in 150-200 words. Refer to their specific profile where relevant. Only answer career and admission related questions. If asked something unrelated, politely redirect the conversation back to career guidance."""
+    response = client.models.generate_content(
+        model="gemini-2.0-flash-lite",
+        contents=prompt
+    )
+    if not response.text:
+        raise ValueError("Empty response from Gemini")
+    else:
+        return response.text
