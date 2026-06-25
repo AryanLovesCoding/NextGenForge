@@ -30,8 +30,15 @@ def ingest_knowledge_base():
     pdf_files = [f for f in os.listdir(knowledge_base_path) if f.endswith('.pdf')]
     client = chromadb.PersistentClient(path="./chromadb_store")
     collection = client.get_or_create_collection("career_knowledge")
+    if collection.count() > 0:
+        print("Knowledge base already ingested. Skipping.")
+        return
     for pdf in pdf_files:
         text = ""
+        existing = collection.get(where={"source": pdf})
+        if len(existing['ids']) > 0:
+            print(f"Skipping {pdf} - already ingested")
+            continue
         reader = PdfReader(os.path.join(knowledge_base_path, pdf))
         for page in reader.pages:
             extracted = page.extract_text()
