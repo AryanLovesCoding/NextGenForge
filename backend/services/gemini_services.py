@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from google import genai
 import json
+import re
 
 load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
@@ -11,17 +12,22 @@ def get_stream_recommendation(scores: dict, academic_level: str, keywords: list)
     
     json_structure = '{"recommended_stream": "one of: Science/PCM, Science/PCB, Commerce, Humanities", "justification": "minimum 150 word personalised justification", "alternative_stream": "only if scores are very close, otherwise null"}'
     
-    prompt = f"You are a college counsellor helping students pick their subject choices and career paths for their future. The student has taken an interests assessment and gotten the following results: {scores}, where each score is normalised between 0 and 1 and 1 indicates the strongest interest in that domain. The student has also filled out their personal information and stated that their academic performance is between {academic_level}%. They have also provided a list of keywords as future career aspirations and streams they are interested in: {keywords}. Based on this information, recommend one of four streams (Science/PCM, Science/PCB, Commerce, Humanities) with a minimum 150-word personalised justification, explaining in detail your suggestions for their career and choices they should make. Note that a high Design/Creative Arts score may indicate suitability for design-oriented paths within Science/PCM or Arts streams. In case their scores and interests match multiple career choices and domains, please mention all such possibilities. Respond ONLY with a JSON object with no additional text, no markdown, no backticks, using this exact structure: {json_structure}"
+    prompt = f"You are a college counsellor helping students pick their subject choices and career paths for their future. The student has taken an interests assessment and gotten the following results: {scores}, where each score is normalised between 0 and 1 and 1 indicates the strongest interest in that domain. The student has also filled out their personal information and stated that their academic performance is between {academic_level}%. They have also provided a list of keywords as future career aspirations and streams they are interested in: {keywords}. Based on this information, recommend one of four streams (Science/PCM, Science/PCB, Commerce, Humanities) with a minimum 150-word personalised justification, explaining in detail your suggestions for their career and choices they should make. Note that a high Design/Creative Arts score may indicate suitability for design-oriented paths within Science/PCM or Arts streams. In case their scores and interests match multiple career choices and domains, please mention all such possibilities. Respond ONLY with a JSON object with no additional text, no markdown, no backticks, using this exact structure: {json_structure}. Respond ONLY with a single-line JSON object with no newlines, no markdown, no backticks, no line breaks inside the JSON values."
     
     response = client.models.generate_content(
-        model="gemini-2.0-flash-lite",
+        model="gemini-2.5-flash",
         contents=prompt
     )
-    
+
+    cleaned = response.text.strip()
+    cleaned = re.sub(r'```json\n?', '', cleaned)
+    cleaned = re.sub(r'```\n?', '', cleaned)
+    cleaned = cleaned.replace('\n', ' ')
+
     if not response.text:
         raise ValueError("Empty response from Gemini")
     try:
-        return json.loads(response.text)
+        return json.loads(cleaned)
     except json.JSONDecodeError:
         raise ValueError(f"Invalid JSON response from Gemini: {response.text}")
     
@@ -33,7 +39,7 @@ def get_degree_recommendation(stream: str, interests: list, scores: dict):
     prompt = f"You are a college counsellor helping students understand which degree is best for them. The student has filled out a form and is interested in {stream}. The student has taken an interests assessment and gotten the following results: {scores}, where each score is normalised between 0 and 1 and 1 indicates the strongest interest in that domain. Additionally, in the form they have also mentioned their interests, take those into account: {interests}. Respond ONLY with a JSON object with no additional text, no markdown, no backticks, using this exact structure: {json_structure}"
 
     response = client.models.generate_content(
-        model="gemini-2.0-flash-lite",
+        model="gemini-2.5-flash",
         contents=prompt
     )
     
@@ -61,7 +67,7 @@ def get_chat_response(message: str, chat_history: list[dict], student_context: d
 
         Answer the student's question in a warm, helpful, and conversational tone in 150-200 words. Refer to their specific profile where relevant. Only answer career and admission related questions. If asked something unrelated, politely redirect the conversation back to career guidance."""
     response = client.models.generate_content(
-        model="gemini-2.0-flash-lite",
+        model="gemini-2.5-flash",
         contents=prompt
     )
     if not response.text:

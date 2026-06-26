@@ -3,7 +3,7 @@ import os
 import requests
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from streamlit_tags import st_tags
-from backend.services.student_services import create_student
+from backend.services.student_services import create_student, update_student_interests
 from backend.services.assessment import assessment_scores, calculate_scores
 from backend.services.gemini_services import get_chat_response
 from backend.schemas.student import StudentCreate
@@ -168,6 +168,7 @@ elif st.session_state.step == 3:
             st.error("Please enter a maximum of 5 keywords.")
         else:
             st.session_state.keywords = user_keywords
+            update_student_interests(st.session_state.student_id, st.session_state.subjects, user_keywords)
             st.session_state.step += 1
             st.rerun()
 
@@ -284,8 +285,8 @@ elif st.session_state.step == 7:
 # AI ChatBot
 elif st.session_state.step == 8:
     for message in st.session_state.chat_history:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+        with st.chat_message("assistant" if isinstance(message, str) else message["role"]):                                       
+            st.markdown(message["content"] if isinstance(message, dict) else message)
     user_input = st.chat_input("Ask me anything about your career...")
     if user_input:
         st.chat_message("user").write(user_input)
@@ -304,8 +305,8 @@ elif st.session_state.step == 8:
         else:
             ai_response = "Sorry, I couldn't process your request. Please try again."
         st.chat_message("assistant").write(ai_response)
-        st.session_state.chat_history.append({"role": "user", "content": user_input})
-        st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+        st.session_state.chat_history.update({"role": "user", "content": user_input})
+        st.session_state.chat_history.update({"role": "assistant", "content": ai_response})
     "---"
     left, m1, m2, m3, m4, m5, m6, m7, right = st.columns(9)
     if left.button('Back'):

@@ -17,4 +17,5 @@ def get_function(id: int):
         return DegreeRecommendationResponse (**result)
     #Error handling
     except Exception as e:
+        print(f"DEGREE ERROR: {str(e)}")
         raise HTTPException(status_code=503, detail=f"AI service unavailable: {str(e)}")

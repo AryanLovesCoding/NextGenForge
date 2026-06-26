@@ -30,3 +30,13 @@ def get_student(id: int):
     conn.close()
     return value
 
+def update_student_interests(student_id, subjects, keywords):
+    conn = connect_to_database()
+    cursor = conn.cursor()
+    sql = """UPDATE Student SET interests = ? WHERE id = ?"""
+    value = ", ".join(subjects + keywords)
+    cursor.execute(sql, (value, student_id))
+    conn.commit()
+    conn.close()
+
+

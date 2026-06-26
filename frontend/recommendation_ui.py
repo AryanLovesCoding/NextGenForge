@@ -12,15 +12,16 @@ def render_stream_recommendation(res: dict):
     # Justification flashcard
     st.markdown(f"""
     <div style="
-        background: #E6F1FB;
-        border-radius: 16px;
-        padding: 2.5rem 2rem;
-        margin: 1rem 0 2rem 0;
-        text-align: left;
+    background: #E6F1FB;
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    margin: 1rem 0 2rem 0;
+    width: 100%;
+    box-sizing: border-box;
     ">
-        <p style="font-size: 0.9rem; font-weight: 600; color: #185FA5; text-transform: uppercase; 
-                  letter-spacing: 0.05em; margin-bottom: 1rem;">Justification</p>
-        <p style="font-size: 1.1rem; color: #0C447C; line-height: 1.8; margin: 0;">{res['justification']}</p>
+    <p style="font-size: 0.9rem; font-weight: 600; color: #185FA5; text-transform: uppercase; 
+              letter-spacing: 0.05em; margin-bottom: 1rem;">Justification</p>
+    <p style="font-size: 1.1rem; color: #1a1a1a; line-height: 1.8; margin: 0; white-space: pre-wrap;">{res['justification']}</p>
     </div>
     """, unsafe_allow_html=True)
 

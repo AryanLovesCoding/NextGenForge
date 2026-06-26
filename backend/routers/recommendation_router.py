@@ -7,7 +7,8 @@ router = APIRouter()
 def post_function(request: StreamRecommendationRequest):
     try:
         result = get_stream_recommendation(request.scores, request.academic_level, request.keywords)
-        return StreamRecommendationResponse(response=result)
+        return StreamRecommendationResponse(**result)
     #Error handling
     except Exception as e:
+        print(f"ERROR: {str(e)}")
         raise HTTPException(status_code=503, detail=f"AI service unavailable: {str(e)}")

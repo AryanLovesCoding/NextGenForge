@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 class StreamRecommendationRequest(BaseModel):
     scores: dict
@@ -6,7 +7,9 @@ class StreamRecommendationRequest(BaseModel):
     keywords: list
 
 class StreamRecommendationResponse(BaseModel):
-    response: str 
+    recommended_stream: str
+    justification: str
+    alternative_stream: Optional[str] = None
 
 class DegreeItem(BaseModel):
     degree_name: str
