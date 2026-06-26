@@ -25,14 +25,22 @@ metadata_map = {
     "Career_in_Artificial_Intelligence.pdf": {"stream_category": "STEM", "topic": "career_guide"},
 }
 
+admission_metadata_map = {
+    "UGC_NET_Information_Bulletin.pdf": {"stream_category": "General", "topic": "entrance_exams", "exam_type": "UGC_NET", "year": "2026"},
+    "UGC_Academic_calendar.pdf": {"stream_category": "General", "topic": "academic_calendar", "exam_type": "none", "year": "2026"},
+    "NIELIT_Syllabus.pdf": {"stream_category": "STEM", "topic": "syllabus", "exam_type": "NIELIT", "year": "2026"},
+    "NEET_Syllabus.pdf": {"stream_category": "STEM", "topic": "syllabus", "exam_type": "NEET", "year": "2026"},
+    "JNU_Admission_guide.pdf": {"stream_category": "General", "topic": "application_guide", "exam_type": "none", "year": "2026"},
+    "JEE_Syllabus.pdf": {"stream_category": "STEM", "topic": "syllabus", "exam_type": "JEE", "year": "2026"},
+    "CLAT_Syllabus.pdf": {"stream_category": "Humanities", "topic": "syllabus", "exam_type": "CLAT", "year": "2026"},
+    "AICTE_Scholarship.pdf": {"stream_category": "General", "topic": "scholarships", "exam_type": "none", "year": "2026"},
+}
+
 def ingest_knowledge_base():
     knowledge_base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "knowledge_base")
     pdf_files = [f for f in os.listdir(knowledge_base_path) if f.endswith('.pdf')]
     client = chromadb.PersistentClient(path="./chromadb_store")
     collection = client.get_or_create_collection("career_knowledge")
-    if collection.count() > 0:
-        print("Knowledge base already ingested. Skipping.")
-        return
     for pdf in pdf_files:
         text = ""
         existing = collection.get(where={"source": pdf})
@@ -49,11 +57,13 @@ def ingest_knowledge_base():
         while start < len(text):
             chunks.append(text[start:start + 2000])
             start += 1800
-        metadata = metadata_map.get(pdf, {"stream_category": "General", "topic": "general"})
+        metadata = admission_metadata_map.get(pdf) or metadata_map.get(pdf, {"stream_category": "General", "topic": "general"})
         for i, chunk in enumerate(chunks):
+            if not chunk.strip():
+                continue
             collection.add(
                 documents=[chunk],
-                metadatas=[{"source": pdf, "stream_category": metadata["stream_category"], "topic": metadata["topic"]}],
+                metadatas=[{"source": pdf, "stream_category": metadata["stream_category"], "topic": metadata["topic"], "exam_type": metadata.get("exam_type", "none"), "year": metadata.get("year", "none")}],
                 ids=[f"{pdf}_chunk_{i}"]
             )
 

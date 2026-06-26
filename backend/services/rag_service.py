@@ -8,11 +8,28 @@ from dotenv import load_dotenv
 load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
 
+def classify_intent(query: str):
+    admission_keywords = ["admission","admissions","apply","application","enroll","enrollment","register","registration","eligibility","eligible","criteria",
+    "requirements","qualification","qualify","cutoff","cut-off","merit","seat","seats","counselling","counseling","allotment",
+    "college","university","institute","campus","intake","vacancy","deadline","last date","form","documents","certificate","fee",
+    "tuition","prospectus","round","quota","reservation","admit","jee","neet","cuet","clat"]
+    for keyword in admission_keywords:
+        if keyword in query.lower():
+            return 'admission'
+    return 'career'
+
 def get_rag_response(query, stream=None):
+    type_of_query = classify_intent(query)
+    if type_of_query == "admission":
+        search_kwargs = {"k": 5, "filter": {"topic": {"$in": ["entrance_exams", "syllabus", "application_guide", "scholarships", "academic_calendar"]}}}
+    else:
+        search_kwargs = {"k": 5}
     vectorstore = Chroma(collection_name="career_knowledge", persist_directory="./chromadb_store")
-    retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
+    retriever = vectorstore.as_retriever(search_kwargs = search_kwargs)
     llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", api_key = api_key)
     prompt = PromptTemplate(template="You are a warm and knowledgeable career counsellor helping a student navigate their higher education and career choices. Use only the following information to answer: {context}. Cite which document the answer came from. You are strictly not allowed to answer from outside the provided context. Include the user's {question}.", input_variables=["context", "question"])
     chain = RetrievalQA.from_chain_type(llm=llm, retriever=retriever, chain_type_kwargs={"prompt": prompt}, return_source_documents=True)
     result = chain.invoke({"query": query})
     return {"response": result["result"], "sources": list(set(doc.metadata.get("source") for doc in result["source_documents"] if doc.metadata.get("source")))}
+
+
