@@ -39,4 +39,14 @@ def update_student_interests(student_id, subjects, keywords):
     conn.commit()
     conn.close()
 
+def save_conversation_turn(student_id: int, role: str, message: str):
+    conn = connect_to_database()
+    cursor = conn.cursor()
+    sql = """INSERT INTO ConversationHistory (session_id, role, message, timestamp)
+    Values (?, ?, ?, ?)"""
+    values = (student_id, role, message, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    cursor.execute(sql,values)
+    conn.commit()
+    cursor.close()
+    conn.close()
 
