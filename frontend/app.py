@@ -41,6 +41,14 @@ if 'chat_history' not in st.session_state:
 
 # Welcome page
 if not st.session_state.welcome_done:
+    if st.button("Skip to Chat (Debug)"):
+        st.session_state.step = 8
+        st.session_state.stream = "STEM"
+        st.session_state.subjects = ["Physics", "Maths"]
+        st.session_state.marks = (75, 90)
+        st.session_state.keywords = ["Engineer"]
+        st.session_state.assessment_scores = {"STEM": 0.8, "Commerce": 0.3, "Humanities": 0.4, "Design/Creative Arts": 0.5}
+        st.rerun()
     st.markdown("""
     <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 4rem 2rem; text-align:center;">
         <h1 style="font-size:3rem; font-weight:700; margin-bottom:1rem;">Welcome!</h1>
@@ -284,6 +292,18 @@ elif st.session_state.step == 7:
 
 # AI ChatBot
 elif st.session_state.step == 8:
+    # Persistent sidebar - conversation history
+    with st.sidebar:
+        st.title("💬 Conversation History")
+        if st.session_state.chat_history:
+            for msg in st.session_state.chat_history:
+                role_label = "You" if msg["role"] == "user" else "AI"
+                st.caption(f"**{role_label}:** {msg['content'][:80]}...")
+            if st.button("Clear History"):
+                st.session_state.chat_history = []
+                st.rerun()
+        else:
+            st.caption("No conversation history yet.")
     st.subheader("Career Guidance Chat")
     st.caption("Ask me anything about your career, stream, or college admissions.")
     for message in st.session_state.chat_history:
@@ -314,10 +334,53 @@ elif st.session_state.step == 8:
         st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
     "---"
     left, m1, m2, m3, m4, m5, m6, m7, right = st.columns(9)
-    if left.button('Back', key='back_8'):
+    if left.button('Back'):
         st.session_state.step -= 1
         st.rerun()
-    if right.button('Next', key='next_8'):
+    if right.button('Next'):
         st.session_state.step += 1
         st.rerun()
     
+# RoadMap
+elif st.session_state.step == 9:
+    st.subheader("RoadMap")
+    st.caption("Here's the roadmap for your career: ")
+    student_id = st.session_state.student_id
+    response = requests.get(f"{API_BASE_URL}/api/roadmap/{student_id}")
+    col1, col2, col3, col4, col5 = st.columns(5)
+    if response.status_code == 200:
+        roadmap = response.json()
+        with col1:
+            st.subheader("Class 11-12")
+            st.write(roadmap['class_11_12_preparation'])
+
+        with col2:
+            st.subheader("Entrance Exams")
+            for exam in roadmap['entrance_exam_timeline']:
+                st.write(f"**{exam['exam']}** — {exam['when']}")
+                st.caption(exam['preparation_tip'])
+
+        with col3:
+            st.subheader("Undergraduate")
+            for milestone in roadmap['undergraduate_milestones']:
+                st.write(f"**{milestone['year']}**")
+                st.write(milestone['focus'])
+
+        with col4:
+            st.subheader("Internships")
+            st.write(roadmap['internship_milestones'])
+
+        with col5:
+            st.subheader("Industry Entry")
+            st.write(roadmap['industry_entry_pathway'])
+    else:
+        st.error("Could not generate roadmap. Please try again.")
+        st.stop()
+    "---"
+    left, m1, m2, m3, m4, m5, m6, m7, right = st.columns(9)
+    if left.button('Back'):
+        st.session_state.step -= 1
+        st.rerun()
+    if right.button('Next'):
+        st.session_state.step += 1
+        st.rerun()

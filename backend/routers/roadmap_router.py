@@ -19,5 +19,5 @@ def get_function(student_id: int):
         return RoadmapResponse (**result)
     #Error handling
     except Exception as e:
-        print(f"DEGREE ERROR: {str(e)}")
+        print(f"ROADMAP ERROR: {str(e)}")
         raise HTTPException(status_code=503, detail=f"AI service unavailable: {str(e)}")
