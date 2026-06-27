@@ -1,0 +1,27 @@
+from backend.schemas.college_comparision import CollegeResponse
+from backend.database.connection import connect_to_database
+
+def get_colleges(stream=None, state=None, max_fee=None):
+    conn = connect_to_database()
+    cursor = conn.cursor()
+    sql = "SELECT * FROM CollegeComparision"
+    conditions = []
+    values = []
+    if stream:
+        conditions.append("stream = ?")
+        values.append(stream)
+    if state:
+        conditions.append("state = ?")
+        values.append(state)
+    if conditions:
+        sql += " WHERE " + " AND ".join(conditions)
+    cursor.execute(sql, values)
+    results = cursor.fetchall()
+    if max_fee:
+        results = [r for r in results if int(r[6].replace(",", "")) <= int(max_fee)]
+    cursor.close()
+    conn.close()
+    return results
+
+    
+    

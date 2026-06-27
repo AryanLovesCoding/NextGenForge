@@ -41,13 +41,10 @@ if 'chat_history' not in st.session_state:
 
 # Welcome page
 if not st.session_state.welcome_done:
-    if st.button("Skip to Chat (Debug)"):
-        st.session_state.step = 8
-        st.session_state.stream = "STEM"
-        st.session_state.subjects = ["Physics", "Maths"]
-        st.session_state.marks = (75, 90)
-        st.session_state.keywords = ["Engineer"]
-        st.session_state.assessment_scores = {"STEM": 0.8, "Commerce": 0.3, "Humanities": 0.4, "Design/Creative Arts": 0.5}
+    if st.button("Skip to College Comparison (Debug)", key="debug_10"):
+        st.session_state.welcome_done = True
+        st.session_state.step = 10
+        st.session_state.student_id = 1
         st.rerun()
     st.markdown("""
     <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 4rem 2rem; text-align:center;">
@@ -382,5 +379,46 @@ elif st.session_state.step == 9:
         st.session_state.step -= 1
         st.rerun()
     if right.button('Next'):
+        st.session_state.step += 1
+        st.rerun()
+
+elif st.session_state.step == 10:
+    st.subheader("College Comparision")
+    st.caption("Here's the top 30 colleges in India: ")
+    all_colleges = requests.get(f"{API_BASE_URL}/api/colleges").json()
+    max_fee = max(int(c['annual_fees'].replace(",", "")) for c in all_colleges)
+    col1, col2, col3 = st.columns(3)
+    with col1:
+            stream_filter = st.selectbox("Stream", [None, "STEM", "Commerce", "Humanities"])
+    with col2:
+        state_filter = st.selectbox("State", [None, "Delhi", "Maharashtra", "Tamil Nadu", "Uttar Pradesh", "West Bengal", "Uttarakhand", "Assam", "Karnataka", "Rajasthan", "Telangana", "Haryana"])
+    with col3:
+        fee_filter = st.slider("Max Annual Fee (₹)", 0, max_fee, max_fee, step = 50000)
+
+    params = {}
+    if stream_filter:
+        params["stream"] = stream_filter
+    if state_filter:
+        params["state"] = state_filter
+    if fee_filter > 0:
+        params["max_fee"] = fee_filter
+        
+    filtered_colleges = requests.get(f"{API_BASE_URL}/api/colleges", params=params).json()
+    college_names = [c['name'] for c in filtered_colleges]
+    selected = st.multiselect("Select 2-3 colleges to compare", college_names, max_selections=3)
+    if selected:
+        selected_data = [c for c in filtered_colleges if c['name'] in selected]
+        comparison = {
+            "Field": ["Stream", "City", "State", "Ranking", "Annual Fees", "Entrance Exam", "Placement Average", "Notable Alumni"]
+        }
+        for c in selected_data:
+            comparison[c['name']] = [c['stream'], c['city'], c['state'], c['ranking'], c['annual_fees'], c['entrance_exam'], c['placement_average'], c['notable_alumni']]
+        st.dataframe(comparison, hide_index=True)
+    "---"
+    left, m1, m2, m3, m4, m5, m6, m7, right = st.columns(9)
+    if left.button('Back'):
+        st.session_state.step -= 1
+        st.rerun()
+    elif right.button('Next'):
         st.session_state.step += 1
         st.rerun()

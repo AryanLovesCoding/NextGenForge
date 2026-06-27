@@ -55,6 +55,21 @@ def create_tables():
         )
     """)
 
+# Comparision table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS CollegeComparision (
+                   id INTEGER PRIMARY KEY AUTOINCREMENT,
+                   name VARCHAR(255),
+                   stream VARCHAR(255),
+                   city VARCHAR(255),
+                   state VARCHAR(255),
+                   ranking INTEGER,
+                   annual_fees VARCHAR(255),
+                   entrance_exam VARCHAR(255),
+                   placement_average VARCHAR(255),
+                   notable_alumni TEXT)
+    """)
+
     conn.commit()
     conn.close()
 #Checking message
