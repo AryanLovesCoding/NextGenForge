@@ -37,7 +37,7 @@ if 'assessment_complete' not in st.session_state:
     st.session_state.assessment_complete = False
 
 if 'chat_history' not in st.session_state:
-    st.session_state.chat_history = {}
+    st.session_state.chat_history = []
 
 # Welcome page
 if not st.session_state.welcome_done:
@@ -284,15 +284,20 @@ elif st.session_state.step == 7:
 
 # AI ChatBot
 elif st.session_state.step == 8:
+    st.subheader("Career Guidance Chat")
+    st.caption("Ask me anything about your career, stream, or college admissions.")
     for message in st.session_state.chat_history:
-        with st.chat_message("assistant" if isinstance(message, str) else message["role"]):                                       
-            st.markdown(message["content"] if isinstance(message, dict) else message)
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
     user_input = st.chat_input("Ask me anything about your career...")
     if user_input:
         st.chat_message("user").write(user_input)
-        student_context = {"stream": st.session_state.stream, "subjects": st.session_state.subjects,
-                           "marks": st.session_state.marks, "keywords": st.session_state.keywords,
-                           "scores": st.session_state.assessment_scores
+        student_context = {
+            "stream": st.session_state.stream,
+            "subjects": st.session_state.subjects,
+            "marks": st.session_state.marks,
+            "keywords": st.session_state.keywords,
+            "scores": st.session_state.assessment_scores
         }
         payload = {
             "message": user_input,
@@ -305,14 +310,14 @@ elif st.session_state.step == 8:
         else:
             ai_response = "Sorry, I couldn't process your request. Please try again."
         st.chat_message("assistant").write(ai_response)
-        st.session_state.chat_history.update({"role": "user", "content": user_input})
-        st.session_state.chat_history.update({"role": "assistant", "content": ai_response})
+        st.session_state.chat_history.append({"role": "user", "content": user_input})
+        st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
     "---"
     left, m1, m2, m3, m4, m5, m6, m7, right = st.columns(9)
-    if left.button('Back'):
+    if left.button('Back', key='back_8'):
         st.session_state.step -= 1
         st.rerun()
-    if right.button('Next'):
+    if right.button('Next', key='next_8'):
         st.session_state.step += 1
         st.rerun()
     

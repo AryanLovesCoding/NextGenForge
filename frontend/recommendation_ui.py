@@ -26,7 +26,7 @@ def render_stream_recommendation(res: dict):
     """, unsafe_allow_html=True)
 
     # Alternative stream
-    if res['alternative_stream']:
+    if res['alternative_stream'] and res['alternative_stream'] != "null":
         st.markdown(f"""
         <div style="text-align: center; margin-top: 1rem;">
             <p style="color: #A0AEC0; font-size: 0.95rem; margin-bottom: 0.3rem;">You may also consider</p>

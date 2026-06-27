@@ -74,3 +74,31 @@ def get_chat_response(message: str, chat_history: list[dict], student_context: d
         raise ValueError("Empty response from Gemini")
     else:
         return response.text
+    
+def get_roadmap(stream: str, interests: list[str], keywords: list[str], academic_level: str, scores: dict):
+    client = genai.Client(api_key=api_key)
+    json_structure = json.dumps({
+    "recommended_stream": "stream name",
+    "class_11_12_preparation": "50+ word explanation",
+    "entrance_exam_timeline": [{"exam": "exam name", "when": "timing", "preparation_tip": "tip"}],
+    "undergraduate_milestones": [{"year": "Year 1", "focus": "what to focus on", "goals": "key goals"}],
+    "skill_development": ["skill 1", "skill 2", "skill 3"],
+    "internship_milestones": "50+ word explanation",
+    "industry_entry_pathway": "50+ word explanation"
+    })
+
+    prompt = f"You are a college counsellor helping students understand a timeline for their career. The student has been recommended {stream} based on previous assessments they have taken. The student is interested in {interests}. They have also entered the following keywords for their career aspirations: {keywords}. The academic level of the student is: {academic_level}. The student took an assessment where they got a vector for different streams: {scores}. Based on this information, generate a structured, timeline-based career roadmap. Give your response in only this JSON format: {json_structure}"
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt
+    )
+    if not response.text:
+        raise ValueError("Empty response from Gemini")
+    cleaned = response.text.strip()
+    cleaned = re.sub(r'```json\n?', '', cleaned)
+    cleaned = re.sub(r'```\n?', '', cleaned)
+    cleaned = cleaned.replace('\n', ' ')
+    try:
+        return json.loads(cleaned)
+    except json.JSONDecodeError:
+        raise ValueError(f"Invalid JSON response from Gemini: {response.text}")
