@@ -7,6 +7,7 @@ from backend.routers.chatbot_router import router as chatbot_router
 from backend.routers.rag_router import router as rag_router
 from backend.routers.roadmap_router import router as roadmap_router
 from backend.routers.college_router import router as college_router
+from backend.routers.analytics_router import router as analytics_router
 from backend.models.create_tables import create_tables
 
 
@@ -19,6 +20,7 @@ app.include_router(chatbot_router)
 app.include_router(rag_router)
 app.include_router(roadmap_router)
 app.include_router(college_router)
+app.include_router(analytics_router)
 
 create_tables()
 

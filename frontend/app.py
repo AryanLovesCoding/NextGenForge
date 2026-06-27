@@ -41,11 +41,6 @@ if 'chat_history' not in st.session_state:
 
 # Welcome page
 if not st.session_state.welcome_done:
-    if st.button("Skip to College Comparison (Debug)", key="debug_10"):
-        st.session_state.welcome_done = True
-        st.session_state.step = 10
-        st.session_state.student_id = 1
-        st.rerun()
     st.markdown("""
     <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 4rem 2rem; text-align:center;">
         <h1 style="font-size:3rem; font-weight:700; margin-bottom:1rem;">Welcome!</h1>
@@ -243,7 +238,8 @@ elif st.session_state.step == 6:
     payload = {
         "scores": st.session_state.assessment_scores,
         "academic_level": f"{st.session_state.marks[0]}-{st.session_state.marks[1]}",
-        "keywords": st.session_state.keywords
+        "keywords": st.session_state.keywords,
+        "student_id": st.session_state.student_id
     }
     response = requests.post(f"{API_BASE_URL}/api/recommend/stream", json=payload)
     if response.status_code == 200:
@@ -382,6 +378,7 @@ elif st.session_state.step == 9:
         st.session_state.step += 1
         st.rerun()
 
+# College Comparision
 elif st.session_state.step == 10:
     st.subheader("College Comparision")
     st.caption("Here's the top 30 colleges in India: ")

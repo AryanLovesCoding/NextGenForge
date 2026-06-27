@@ -50,3 +50,12 @@ def save_conversation_turn(student_id: int, role: str, message: str):
     cursor.close()
     conn.close()
 
+def update_recommended_stream(student_id, stream):
+    conn = connect_to_database()
+    cursor = conn.cursor()
+    sql = """UPDATE Student SET recommended_stream = ? WHERE id = ?"""
+    values = (stream, student_id)
+    cursor.execute(sql,values)
+    conn.commit()
+    conn.close()
+
