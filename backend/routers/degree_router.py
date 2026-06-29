@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException
 
 router = APIRouter()
 
-@router.get("/api/recommend/degrees/{id}")
+@router.get("/api/recommend/degrees/{id}", response_model=DegreeRecommendationResponse, summary="Potential degree generation", description="Takes the student id and gives the recommended degrees for that student based on their responses.")
 def get_function(id: int):
     student_data = get_student(id)
     stream = student_data[3]
@@ -17,5 +17,4 @@ def get_function(id: int):
         return DegreeRecommendationResponse (**result)
     #Error handling
     except Exception as e:
-        print(f"DEGREE ERROR: {str(e)}")
         raise HTTPException(status_code=503, detail=f"AI service unavailable: {str(e)}")

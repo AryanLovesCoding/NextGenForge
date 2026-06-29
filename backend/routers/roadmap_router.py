@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException
 
 router = APIRouter()
 
-@router.get("/api/roadmap/{student_id}")
+@router.get("/api/roadmap/{student_id}", response_model=RoadmapResponse, summary="Gets the career roadmap", description="Takes student ID and gives the career roadmap for that student")
 def get_function(student_id: int):
     student_data = get_student(student_id)
     stream = student_data[3]
@@ -19,5 +19,4 @@ def get_function(student_id: int):
         return RoadmapResponse (**result)
     #Error handling
     except Exception as e:
-        print(f"ROADMAP ERROR: {str(e)}")
         raise HTTPException(status_code=503, detail=f"AI service unavailable: {str(e)}")

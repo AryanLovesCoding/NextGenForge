@@ -10,6 +10,13 @@ load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
 
 def classify_intent(query: str):
+    """
+    Classifies the intent as either admission query or career query using keywords
+
+    Args: query(str): text message input by student
+
+    Returns: (str): the string 'admission' or 'career' based on the type of query it is  
+    """
     admission_keywords = ["admission","admissions","apply","application","enroll","enrollment","register","registration","eligibility","eligible","criteria",
     "requirements","qualification","qualify","cutoff","cut-off","merit","seat","seats","counselling","counseling","allotment",
     "college","university","institute","campus","intake","vacancy","deadline","last date","form","documents","certificate","fee",
@@ -20,6 +27,16 @@ def classify_intent(query: str):
     return 'career'
 
 def get_rag_response(query, stream=None, chat_history=[]):
+    """
+    Gets the Retrieval-Augmented Generation response
+
+    Args: 
+        query(str): text message input by student
+        stream(str): the stream Gemini thinks is best for the student based on the studen't previous responses
+        chat_history(list[dict]): all the chat that has happened so far so that it can be injected into the new prompt for context
+
+    Returns: the response for the question along with the sources it referred  
+    """
     type_of_query = classify_intent(query)
     if type_of_query == "admission":
         search_kwargs = {"k": 5, "filter": {"topic": {"$in": ["entrance_exams", "syllabus", "application_guide", "scholarships", "academic_calendar"]}}}

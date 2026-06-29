@@ -4,7 +4,7 @@ from backend.services.student_services import save_conversation_turn
 from fastapi import APIRouter, HTTPException
 router = APIRouter()
 
-@router.post("/api/chat/rag")
+@router.post("/api/chat/rag", response_model=RAGResponse, summary="RAG-powered career guidance chat", description="Accepts a user query and chat history, retrieves relevant documents from ChromaDB, and returns a grounded response with source citations")
 def post_function(request: RAGRequest):
     try:
         result = get_rag_response(request.query, request.stream, request.chat_history)

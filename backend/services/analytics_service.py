@@ -1,6 +1,13 @@
 from backend.database.connection import connect_to_database
 
 def get_analytics_summary():
+    """
+    Retrieve analytics data for admin dahsboard
+
+    Args: None
+
+    Returns: a list of data to be displayed on admin page     
+    """
     conn = connect_to_database()
     cursor = conn.cursor()
     cursor.execute("SELECT COUNT(*) FROM Student")

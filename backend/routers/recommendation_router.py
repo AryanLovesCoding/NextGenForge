@@ -4,7 +4,7 @@ from backend.services.student_services import update_recommended_stream
 from fastapi import APIRouter, HTTPException
 router = APIRouter()
 
-@router.post("/api/recommend/stream")
+@router.post("/api/recommend/stream", response_model=StreamRecommendationResponse, summary="Creates the recommended stream for the student", description="Gives the recommended stream")
 def post_function(request: StreamRecommendationRequest):
     try:
         result = get_stream_recommendation(request.scores, request.academic_level, request.keywords)
@@ -12,5 +12,4 @@ def post_function(request: StreamRecommendationRequest):
         return StreamRecommendationResponse(**result)
     #Error handling
     except Exception as e:
-        print(f"ERROR: {str(e)}")
         raise HTTPException(status_code=503, detail=f"AI service unavailable: {str(e)}")

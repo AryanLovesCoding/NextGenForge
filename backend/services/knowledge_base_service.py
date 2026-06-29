@@ -37,6 +37,13 @@ admission_metadata_map = {
 }
 
 def ingest_knowledge_base():
+    """
+    Ingesting the pdf documents for RAG
+
+    Args: None
+
+    Returns: None  
+    """
     knowledge_base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "knowledge_base")
     pdf_files = [f for f in os.listdir(knowledge_base_path) if f.endswith('.pdf')]
     client = chromadb.PersistentClient(path="./chromadb_store")

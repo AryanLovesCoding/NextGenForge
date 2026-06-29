@@ -5,12 +5,12 @@ class StreamRecommendationRequest(BaseModel):
     scores: dict
     academic_level: str 
     keywords: list
+    student_id: int
 
 class StreamRecommendationResponse(BaseModel):
     recommended_stream: str
     justification: str
     alternative_stream: Optional[str] = None
-    student_id: int
 
 class DegreeItem(BaseModel):
     degree_name: str
