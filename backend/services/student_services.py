@@ -22,6 +22,10 @@ def create_student (student: StudentCreate):
               student.academic_level, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     cursor.execute(sql,values)
     student_id = cursor.lastrowid
+    cursor.execute(
+    "INSERT INTO Session (student_id, created_at) VALUES (?, ?)",
+    (student_id, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    )
     conn.commit()
     cursor.close()
     conn.close()

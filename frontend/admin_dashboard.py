@@ -36,11 +36,11 @@ else:
     st.header("Total students:")
     st.write(data["total_students"])
     st.header("Interest profile distribution:")
-    dist = {row[0]: row[1] for row in data["stream_preference_distribution"]}
+    dist = {row[0]: row[1] for row in data["stream_preference_distribution"] if row[0]}
     st.bar_chart(dist)
     st.header("Top 5 career streams recommended:")
     fig, ax = plt.subplots()
-    pie_dist = {row[0]: row[1] for row in data["recommended_stream_distribution"]}
+    pie_dist = {row[0]: row[1] for row in data["recommended_stream_distribution"] if row[0]}
     ax.pie(list(pie_dist.values()), labels=list(pie_dist.keys()), autopct='%1.1f%%')
     ax.legend(list(pie_dist.keys()), loc="best")
     ax.axis('equal')  
@@ -56,8 +56,9 @@ else:
     dates = [row[0] for row in data["daily_sessions"]]
     counts = [row[1] for row in data["daily_sessions"]]
     ax.plot(dates, counts, color="blue", linewidth=2)
-    ax.set_xlabel("X Axis")
-    ax.set_ylabel("Y Axis")
+    ax.set_ylim(bottom=0)
+    ax.set_xlabel("Date")
+    ax.set_ylabel("Number of sessions")
     st.pyplot(fig)
 
 
