@@ -23,7 +23,14 @@ metadata_map = {
     "Career_in_Business_Analytics.pdf": {"stream_category": "Commerce", "topic": "career_guide"},
     "Actuarial_Science_Career.pdf": {"stream_category": "Commerce", "topic": "career_guide"},
     "Career_in_Artificial_Intelligence.pdf": {"stream_category": "STEM", "topic": "career_guide"},
-}
+    "Career in solar.pdf": {"stream_category": "STEM", "topic": "career_guide"},
+    "Career in renewable energy.pdf": {"stream_category": "STEM", "topic": "career_guide"},
+    "Career in cartography.pdf": {"stream_category": "STEM", "topic": "career_guide"},
+    "Career in agriculture.pdf": {"stream_category": "STEM", "topic": "career_guide"},
+    "Cybersecurity careers.pdf": {"stream_category": "STEM", "topic": "career_guide"},
+    "HybridSolarPlant.pdf": {"stream_category": "STEM", "topic": "career_guide"},
+    "Course requirement for industry.pdf" : {"stream_category": "STEM", "topic": "career_guide"}
+    }
 
 admission_metadata_map = {
     "UGC_NET_Information_Bulletin.pdf": {"stream_category": "General", "topic": "entrance_exams", "exam_type": "UGC_NET", "year": "2026"},
@@ -34,6 +41,9 @@ admission_metadata_map = {
     "JEE_Syllabus.pdf": {"stream_category": "STEM", "topic": "syllabus", "exam_type": "JEE", "year": "2026"},
     "CLAT_Syllabus.pdf": {"stream_category": "Humanities", "topic": "syllabus", "exam_type": "CLAT", "year": "2026"},
     "AICTE_Scholarship.pdf": {"stream_category": "General", "topic": "scholarships", "exam_type": "none", "year": "2026"},
+    "Commonwealth shared scholarship.pdf": {"stream_category": "General", "topic": "scholarships", "exam_type": "none", "year": "2026"},
+    "USA Study guide.pdf": {"stream_category": "General", "topic": "application_guide", "exam_type": "none", "year": "2026"},
+    "Australia study.pdf": {"stream_category": "General", "topic": "application_guide", "exam_type": "none", "year": "2026"},
 }
 
 def ingest_knowledge_base():

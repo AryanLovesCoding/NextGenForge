@@ -1,4 +1,5 @@
 import sqlite3
+import json
 from datetime import datetime
 from backend.database.connection import connect_to_database
 from backend.schemas.student import StudentCreate
@@ -104,5 +105,68 @@ def update_recommended_stream(student_id, stream):
     values = (stream, student_id)
     cursor.execute(sql,values)
     conn.commit()
+    conn.close()
+
+def save_degree_recommendations(student_id, degrees):
+    """
+    Saves the recommended degress in Student Database
+
+    Args:
+        student_id(int): The student's unique identifier
+        degrees: JSON string with degrees
+    
+    Returns: None
+    """
+    conn = connect_to_database()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE Student SET degree_recommendations = ? WHERE id = ?", 
+               (json.dumps(degrees), student_id)) 
+    conn.commit()
+    conn.close()
+
+def save_stream_justification(student_id: int, justification: str):
+    """
+    Saves Gemini stream justification to Student table
+
+    Args:
+        student_id(int): The student's unique identifier
+        justification(str): justification of why the student was suggested that stream
+
+    Returns: None
+    """
+    conn = connect_to_database()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE Student SET stream_justification = ? WHERE id = ?", (justification, student_id))
+    conn.commit()
+    conn.close()
+
+def save_roadmap(student_id: int, roadmap: dict):
+    """
+    Saves Gemini roadmap to Student table
+    
+    Args:
+        student_id(int): The student's unique identifier
+        roadmap(dict): the roadmap the student should take based on their recomended career,
+    
+    Returns: None
+     """
+    conn = connect_to_database()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE Student SET roadmap = ? WHERE id = ?", (json.dumps(roadmap), student_id))
+    conn.commit()
+    conn.close()
+
+def update_student_academic(student_id, stream_preference, academic_level):
+    conn = connect_to_database()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE Student
+        SET stream_preference = ?, academic_level = ?
+        WHERE id = ?
+    """, (stream_preference, academic_level, student_id))
+
+    conn.commit()
+    cursor.close()
     conn.close()
 

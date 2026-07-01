@@ -26,7 +26,7 @@ def classify_intent(query: str):
             return 'admission'
     return 'career'
 
-def get_rag_response(query, stream=None, chat_history=[]):
+def get_rag_response(query, stream=None, chat_history=[], student_context: dict = {}):
     """
     Gets the Retrieval-Augmented Generation response
 
@@ -44,16 +44,24 @@ def get_rag_response(query, stream=None, chat_history=[]):
         search_kwargs = {"k": 5}
     vectorstore = Chroma(collection_name="career_knowledge", persist_directory="./chromadb_store")
     retriever = vectorstore.as_retriever(search_kwargs = search_kwargs)
+    scored_results = vectorstore.similarity_search_with_score(query, k=5)
+    avg_distance = sum(score for _, score in scored_results) / len(scored_results)
+    confidence = "High" if avg_distance < 1.3 else "Medium"
     llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", api_key = api_key)
-    prompt = PromptTemplate(template="You are a warm and knowledgeable career counsellor helping a student navigate their higher education and career choices. Use only the following information to answer: {context}. Cite which document the answer came from. You are strictly not allowed to answer from outside the provided context. Include the user's {question}.", input_variables=["context", "question"])
-    memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+    context_str = f"The student has been suggested {student_context.get('stream', 'Not specified')} as their stream and is interested in {student_context.get('subjects', 'Not specified')}. They normally get {student_context.get('marks', 'Not specified')}% marks. Some of their career aspirations are {student_context.get('keywords', 'Not specified')}."
+    prompt = PromptTemplate(
+        template="You are a warm and knowledgeable career counsellor helping a student navigate their higher education and career choices. "
+                + context_str +
+                " Use only the following information to answer: {context}. Cite which document the answer came from. "
+                "You are strictly not allowed to answer from outside the provided context. Question: {question}",
+        input_variables=["context", "question"]
+    )
+    memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True, output_key="answer")
     for msg in chat_history:
         if msg["role"] == "user":
             memory.chat_memory.add_user_message(msg["content"])
         else:
             memory.chat_memory.add_ai_message(msg["content"])
-    chain = ConversationalRetrievalChain.from_llm(llm=llm,retriever=retriever,memory=memory,return_source_documents=True)
+    chain = ConversationalRetrievalChain.from_llm(llm=llm,retriever=retriever,memory=memory,return_source_documents=True, combine_docs_chain_kwargs={"prompt": prompt})
     result = chain.invoke({"question": query})
-    return {"response": result["answer"], "sources": list(set(doc.metadata.get("source") for doc in result["source_documents"] if doc.metadata.get("source")))}
-
-
+    return {"response": result["answer"], "sources": list(set(doc.metadata.get("source") for doc in result["source_documents"] if doc.metadata.get("source"))), "confidence": confidence}

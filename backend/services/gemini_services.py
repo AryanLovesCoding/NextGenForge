@@ -41,7 +41,7 @@ def get_stream_recommendation(scores: dict, academic_level: str, keywords: list)
     except json.JSONDecodeError:
         raise ValueError(f"Invalid JSON response from Gemini: {response.text}")
     
-def get_degree_recommendation(stream: str, interests: list, scores: dict):
+def get_degree_recommendation(stream: str, interests: list, scores: dict, keywords, academic_level):
     """
     Gets the degree recommendation from Gemini based on student responses
 
@@ -65,8 +65,14 @@ def get_degree_recommendation(stream: str, interests: list, scores: dict):
     
     if not response.text:
         raise ValueError("Empty response from Gemini")
+
+    cleaned = response.text.strip()
+    cleaned = re.sub(r'```json\n?', '', cleaned)
+    cleaned = re.sub(r'```\n?', '', cleaned)
+    cleaned = cleaned.replace('\n', ' ')
+
     try:
-        return json.loads(response.text)
+        return json.loads(cleaned)
     except json.JSONDecodeError:
         raise ValueError(f"Invalid JSON response from Gemini: {response.text}")
     

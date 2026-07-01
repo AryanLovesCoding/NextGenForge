@@ -7,7 +7,7 @@ router = APIRouter()
 @router.post("/api/chat/rag", response_model=RAGResponse, summary="RAG-powered career guidance chat", description="Accepts a user query and chat history, retrieves relevant documents from ChromaDB, and returns a grounded response with source citations")
 def post_function(request: RAGRequest):
     try:
-        result = get_rag_response(request.query, request.stream, request.chat_history)
+        result = get_rag_response(request.query, request.stream, request.chat_history, request.student_context)
         save_conversation_turn(request.student_id, "user", request.query)
         save_conversation_turn(request.student_id, "assistant", result["response"])
         return RAGResponse(**result)

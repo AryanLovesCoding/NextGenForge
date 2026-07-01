@@ -6,6 +6,7 @@ class RAGRequest(BaseModel):
     stream: Optional[str] = None
     chat_history: list[dict] = []
     student_id: int
+    student_context: dict = {}
 
 class RAGResponse (BaseModel):
     response: str

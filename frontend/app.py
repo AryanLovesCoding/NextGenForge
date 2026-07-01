@@ -3,7 +3,7 @@ import os
 import requests
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from streamlit_tags import st_tags
-from backend.services.student_services import create_student, update_student_interests
+from backend.services.student_services import create_student, update_student_interests, update_student_academic
 from backend.services.assessment import assessment_scores, calculate_scores
 from backend.services.gemini_services import get_chat_response
 from backend.schemas.student import StudentCreate
@@ -133,6 +133,7 @@ elif st.session_state.step == 2:
             st.session_state.subjects = user_subjects
             st.session_state.custom = custom_subject
             st.session_state.marks = user_marks
+            update_student_academic(st.session_state.student_id, user_stream,f"{user_marks[0]}-{user_marks[1]}")
             st.session_state.step += 1
             st.rerun()
 
@@ -302,6 +303,13 @@ elif st.session_state.step == 8:
     for message in st.session_state.chat_history:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
+            if message["role"] == "assistant" and message.get("sources"):
+                conf = message.get("confidence", "Medium")
+                color = "green" if conf == "High" else "orange"
+                st.badge(f"Confidence: {conf}", color=color)
+                with st.expander("Sources consulted"):
+                    for src in message["sources"]:
+                        st.write(src)
     user_input = st.chat_input("Ask me anything about your career...")
     if user_input:
         st.chat_message("user").write(user_input)
@@ -313,18 +321,25 @@ elif st.session_state.step == 8:
             "scores": st.session_state.assessment_scores
         }
         payload = {
-            "message": user_input,
+            "query": user_input,
+            "stream": st.session_state.stream,
             "chat_history": st.session_state.chat_history,
+            "student_id": st.session_state.student_id,
             "student_context": student_context
         }
-        response = requests.post(f"{API_BASE_URL}/api/chat", json=payload)
+        response = requests.post(f"{API_BASE_URL}/api/chat/rag", json=payload)
         if response.status_code == 200:
             ai_response = response.json()["response"]
+            sources_consulted = response.json()["sources"]
+            confidence = response.json()["confidence"]
         else:
             ai_response = "Sorry, I couldn't process your request. Please try again."
+            sources_consulted = []
+            confidence = "Medium"
         st.chat_message("assistant").write(ai_response)
         st.session_state.chat_history.append({"role": "user", "content": user_input})
-        st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+        st.session_state.chat_history.append({"role": "assistant", "content": ai_response, "sources": sources_consulted})
+        st.rerun()
     "---"
     left, m1, m2, m3, m4, m5, m6, m7, right = st.columns(9)
     if left.button('Back'):
@@ -412,6 +427,25 @@ elif st.session_state.step == 10:
             comparison[c['name']] = [c['stream'], c['city'], c['state'], c['ranking'], c['annual_fees'], c['entrance_exam'], c['placement_average'], c['notable_alumni']]
         st.dataframe(comparison, hide_index=True)
     "---"
+    left, m1, m2, m3, m4, m5, m6, m7, right = st.columns(9)
+    if left.button('Back'):
+        st.session_state.step -= 1
+        st.rerun()
+    elif right.button('Next'):
+        st.session_state.step += 1
+        st.rerun()
+
+#Downloadable PDF
+elif st.session_state.step == 11:
+    st.title("Download My Career Report")
+    response = requests.get(f"{API_BASE_URL}/api/report/{st.session_state.student_id}")
+    if response.status_code == 200:
+        st.download_button(
+            label="📄 Download My Career Report",
+            data=response.content,
+            file_name="career_report.pdf",
+            mime="application/pdf"
+        )
     left, m1, m2, m3, m4, m5, m6, m7, right = st.columns(9)
     if left.button('Back'):
         st.session_state.step -= 1
