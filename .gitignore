@@ -107,3 +107,4 @@ share/
 pyvenv.cfg
 *.pdf
 *.db
+chromadb_store/
