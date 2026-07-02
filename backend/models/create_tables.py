@@ -18,6 +18,7 @@ def create_tables():
             created_at TEXT
         )
     """)
+    cursor.execute("""CREATE INDEX IF NOT EXISTS idx_stream_preference ON Student (stream_preference)""")
 
 #Session table
     cursor.execute("""
@@ -28,6 +29,7 @@ def create_tables():
             FOREIGN KEY (student_id) REFERENCES Student(id)
         )
     """)
+    cursor.execute("""CREATE INDEX IF NOT EXISTS idx_session_student_id ON Session (student_id)""")
 
 #ConversationHistory table 
     cursor.execute("""
@@ -40,6 +42,7 @@ def create_tables():
             FOREIGN KEY (session_id) REFERENCES Session(id)
         )
     """)
+    cursor.execute("""CREATE INDEX IF NOT EXISTS idx_conversation_history_session_id ON ConversationHistory (session_id)""")
 
 #Assessment Scores table
     cursor.execute("""
@@ -54,6 +57,7 @@ def create_tables():
             FOREIGN KEY (student_id) REFERENCES Student(id)
         )
     """)
+    cursor.execute("""CREATE INDEX IF NOT EXISTS idx_assessment_scores_student_id ON AssessmentScores (student_id)""")
 
 # Comparision table
     cursor.execute("""

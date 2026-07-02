@@ -2,12 +2,14 @@ from backend.services.student_services import get_student, save_degree_recommend
 from backend.services.assessment import get_assessment_scores
 from backend.services.gemini_services import get_degree_recommendation
 from backend.schemas.gemini_recommendation import DegreeRecommendationResponse
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
+from backend.limiter import limiter
 
 router = APIRouter()
 
 @router.get("/api/recommend/degrees/{id}", response_model=DegreeRecommendationResponse, summary="Potential degree generation", description="Takes the student id and gives the recommended degrees for that student based on their responses.")
-def get_function(id: int):
+@limiter.limit("5/minute")
+def get_function(id: int, request: Request):
     student_data = get_student(id)
     stream = student_data[3]
     interests = student_data[4].split(", ")

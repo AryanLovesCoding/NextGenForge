@@ -2,12 +2,14 @@ from backend.services.student_services import get_student, save_roadmap
 from backend.services.assessment import get_assessment_scores
 from backend.services.gemini_services import get_roadmap
 from backend.schemas.roadmap import RoadmapResponse
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
+from backend.limiter import limiter
 
 router = APIRouter()
 
 @router.get("/api/roadmap/{student_id}", response_model=RoadmapResponse, summary="Gets the career roadmap", description="Takes student ID and gives the career roadmap for that student")
-def get_function(student_id: int):
+@limiter.limit("5/minute")
+def get_function(student_id: int, request: Request):
     student_data = get_student(student_id)
     stream = student_data[3]
     interests = student_data[4].split(", ")

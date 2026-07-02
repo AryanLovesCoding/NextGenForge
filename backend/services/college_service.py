@@ -1,6 +1,8 @@
 from backend.schemas.college_comparision import CollegeResponse
 from backend.database.connection import connect_to_database
+from functools import lru_cache
 
+@lru_cache(maxsize=128)
 def get_colleges(stream=None, state=None, max_fee=None):
     """
     Gets the colleges based on the filters required by the student
