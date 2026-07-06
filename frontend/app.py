@@ -11,6 +11,9 @@ import streamlit as st
 from data.questions import questions
 from assessment_styles import render_question, render_results
 from recommendation_ui import render_stream_recommendation
+from ui_helpers import inject_custom_css, run_with_loader, roadmap_card, show_loading_bar
+
+inject_custom_css()
 
 API_BASE_URL = "http://127.0.0.1:8000"
 
@@ -236,7 +239,7 @@ elif st.session_state.step == 5:
 
 # Google Gemini stream recommendation
 elif st.session_state.step == 6:
-    @st.cache_data(ttl=86400)
+    @st.cache_data(ttl=86400, show_spinner=False)
     def get_stream_recommendation(scores_items, academic_level, keywords_tuple, student_id):
         payload = {
             "scores": dict(scores_items),
@@ -249,20 +252,37 @@ elif st.session_state.step == 6:
             raise Exception(f"API returned status {response.status_code}")
         return response.json()
 
-    try:
-        result = get_stream_recommendation(
-            tuple(sorted(st.session_state.assessment_scores.items())),
-            f"{st.session_state.marks[0]}-{st.session_state.marks[1]}",
-            tuple(st.session_state.keywords),
-            st.session_state.student_id
-        )
-        render_stream_recommendation(result)
-    except Exception:
-        st.error("Could not get recommendation. Please try again.")
+    if "stream_result" not in st.session_state:
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            show_loading_bar()
+        try:
+            st.session_state.stream_result = get_stream_recommendation(
+                tuple(sorted(st.session_state.assessment_scores.items())),
+                f"{st.session_state.marks[0]}-{st.session_state.marks[1]}",
+                tuple(st.session_state.keywords),
+                st.session_state.student_id
+            )
+        except Exception:
+            st.session_state.stream_result = None
+        st.rerun()
+    else:
+        if st.session_state.stream_result:
+            render_stream_recommendation(st.session_state.stream_result)
+        else:
+            st.error("Could not get recommendation. Please try again.")
+        "---"
+        left, m1, m2, m3, m4, m5, m6, m7, right = st.columns(9)
+        if left.button('Back'):
+            st.session_state.step -= 1
+            st.rerun()
+        elif right.button('Next'):
+            st.session_state.step += 1
+            st.rerun()
 
 # Google Gemini degree recommendation
 elif st.session_state.step == 7:
-    @st.cache_data(ttl=86400)
+    @st.cache_data(ttl=86400, show_spinner=False)
     def get_degree_recommendation(student_id):
         response = requests.get(f"{API_BASE_URL}/api/recommend/degrees/{student_id}")
         if response.status_code != 200:
@@ -270,7 +290,7 @@ elif st.session_state.step == 7:
         return response.json()
 
     try:
-        res = get_degree_recommendation(st.session_state.student_id)
+        res = run_with_loader(get_degree_recommendation, st.session_state.student_id)
         st.header("Recommended Degrees")
         for degree in res['degrees']:
             with st.expander(degree['degree_name']):
@@ -360,46 +380,56 @@ elif st.session_state.step == 8:
     
 # RoadMap
 elif st.session_state.step == 9:
-    st.subheader("RoadMap")
-    st.caption("Here's the roadmap for your career: ")
-    @st.cache_data(ttl=86400)
+    @st.cache_data(ttl=86400, show_spinner=False)
     def get_roadmap(student_id):
         response = requests.get(f"{API_BASE_URL}/api/roadmap/{student_id}")
         if response.status_code != 200:
             raise Exception(f"API returned status {response.status_code}")
         return response.json()
-    try:
-        roadmap = get_roadmap(st.session_state.student_id)
-        col1, col2, col3, col4, col5 = st.columns(5)
-        with col1:
-            st.subheader("Class 11-12")
-            st.write(roadmap['class_11_12_preparation'])
+
+    if "roadmap_result" not in st.session_state:
+        col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            st.subheader("Entrance Exams")
-            for exam in roadmap['entrance_exam_timeline']:
-                st.write(f"**{exam['exam']}** — {exam['when']}")
-                st.caption(exam['preparation_tip'])
-        with col3:
-            st.subheader("Undergraduate")
-            for milestone in roadmap['undergraduate_milestones']:
-                st.write(f"**{milestone['year']}**")
-                st.write(milestone['focus'])
-        with col4:
-            st.subheader("Internships")
-            st.write(roadmap['internship_milestones'])
-        with col5:
-            st.subheader("Industry Entry")
-            st.write(roadmap['industry_entry_pathway'])
-    except Exception:
-        st.error("Could not generate roadmap. Please try again.")
-    "---"
-    left, m1, m2, m3, m4, m5, m6, m7, right = st.columns(9)
-    if left.button('Back'):
-        st.session_state.step -= 1
+            show_loading_bar()
+        try:
+            st.session_state.roadmap_result = get_roadmap(st.session_state.student_id)
+        except Exception:
+            st.session_state.roadmap_result = None
         st.rerun()
-    if right.button('Next'):
-        st.session_state.step += 1
-        st.rerun()
+    else:
+        st.subheader("RoadMap")
+        st.caption("Here's the roadmap for your career: ")
+        if st.session_state.roadmap_result:
+            roadmap = st.session_state.roadmap_result
+            tab1, tab2, tab3, tab4, tab5 = st.tabs(["Class 11-12", "Entrance Exams", "Undergraduate", "Internships", "Industry Entry"])
+            with tab1:
+                roadmap_card("Class 11-12", roadmap['class_11_12_preparation'])
+            with tab2:
+                exams_html = "".join(
+                    f"<p><b>{exam['exam']}</b> — {exam['when']}<br><span style='opacity:0.75'>{exam['preparation_tip']}</span></p>"
+                    for exam in roadmap['entrance_exam_timeline']
+                )
+                roadmap_card("Entrance Exams", exams_html)
+            with tab3:
+                milestones_html = "".join(
+                    f"<p><b>{milestone['year']}</b><br>{milestone['focus']}</p>"
+                    for milestone in roadmap['undergraduate_milestones']
+                )
+                roadmap_card("Undergraduate", milestones_html)
+            with tab4:
+                roadmap_card("Internships", roadmap['internship_milestones'])
+            with tab5:
+                roadmap_card("Industry Entry", roadmap['industry_entry_pathway'])
+        else:
+            st.error("Could not generate roadmap. Please try again.")
+        "---"
+        left, m1, m2, m3, m4, m5, m6, m7, right = st.columns(9)
+        if left.button('Back'):
+            st.session_state.step -= 1
+            st.rerun()
+        if right.button('Next'):
+            st.session_state.step += 1
+            st.rerun()
 
 # College Comparision
 elif st.session_state.step == 10:
@@ -457,7 +487,4 @@ elif st.session_state.step == 11:
     left, m1, m2, m3, m4, m5, m6, m7, right = st.columns(9)
     if left.button('Back'):
         st.session_state.step -= 1
-        st.rerun()
-    elif right.button('Next'):
-        st.session_state.step += 1
         st.rerun()

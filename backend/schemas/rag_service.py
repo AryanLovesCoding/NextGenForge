@@ -11,3 +11,4 @@ class RAGRequest(BaseModel):
 class RAGResponse (BaseModel):
     response: str
     sources: list[str]
+    confidence: str
