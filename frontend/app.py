@@ -3,10 +3,8 @@ import os
 import requests
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from streamlit_tags import st_tags
-from backend.services.student_services import create_student, update_student_interests, update_student_academic
 from backend.services.assessment import assessment_scores, calculate_scores
 from backend.services.gemini_services import get_chat_response
-from backend.schemas.student import StudentCreate
 import streamlit as st
 from data.questions import questions
 from assessment_styles import render_question, render_results
@@ -15,7 +13,7 @@ from ui_helpers import inject_custom_css, run_with_loader, roadmap_card, show_lo
 
 inject_custom_css()
 
-API_BASE_URL = "http://127.0.0.1:8000"
+API_BASE_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:8000")
 
 #Initialising session states
 if 'step' not in st.session_state:
@@ -84,13 +82,14 @@ if st.session_state.step == 1:
             st.session_state.name = user_name
             st.session_state.city = user_city
             st.session_state.grade = user_grade
-            student_id = create_student(StudentCreate(
-                name=user_name,
-                city=user_city,
-                stream_preference="",
-                interests=[],
-                academic_level=""
-            ))
+            response = requests.post(f"{API_BASE_URL}/api/students", json={
+                "name": user_name,
+                "city": user_city,
+                "stream_preference": "",
+                "interests": [],
+                "academic_level": ""
+            })
+            student_id = response.json()["id"]
             st.session_state.student_id = student_id
             st.session_state.step += 1
             st.rerun()
@@ -136,7 +135,10 @@ elif st.session_state.step == 2:
             st.session_state.subjects = user_subjects
             st.session_state.custom = custom_subject
             st.session_state.marks = user_marks
-            update_student_academic(st.session_state.student_id, user_stream,f"{user_marks[0]}-{user_marks[1]}")
+            requests.patch(f"{API_BASE_URL}/api/students/{st.session_state.student_id}/academic", json={
+                "stream_preference": user_stream,
+                "academic_level": f"{user_marks[0]}-{user_marks[1]}"
+            })
             st.session_state.step += 1
             st.rerun()
 
@@ -172,7 +174,10 @@ elif st.session_state.step == 3:
             st.error("Please enter a maximum of 5 keywords.")
         else:
             st.session_state.keywords = user_keywords
-            update_student_interests(st.session_state.student_id, st.session_state.subjects, user_keywords)
+            requests.patch(f"{API_BASE_URL}/api/students/{st.session_state.student_id}/interests", json={
+                "subjects": st.session_state.subjects,
+                "keywords": user_keywords
+            })
             st.session_state.step += 1
             st.rerun()
 

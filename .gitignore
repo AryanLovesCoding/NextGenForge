@@ -108,3 +108,4 @@ pyvenv.cfg
 *.pdf
 *.db
 chromadb_store/
+!knowledge_base/*.pdf

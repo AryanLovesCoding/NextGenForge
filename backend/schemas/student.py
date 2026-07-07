@@ -17,3 +17,14 @@ class StudentResponse(BaseModel):
     interests: list[str]
     academic_level: str
     created_at: str
+
+class StudentInterestsUpdate(BaseModel):
+    subjects: list[str]
+    keywords: list[str]
+
+class StudentAcademicUpdate(BaseModel):
+    stream_preference: str
+    academic_level: str
+
+class StudentIdResponse(BaseModel):
+    id: int

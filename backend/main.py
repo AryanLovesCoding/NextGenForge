@@ -10,6 +10,7 @@ from backend.routers.college_router import router as college_router
 from backend.routers.analytics_router import router as analytics_router
 from backend.routers.pdf_router import router as pdf_router
 from backend.models.create_tables import create_tables
+from backend.services.knowledge_base_service import ingest_knowledge_base
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
@@ -30,4 +31,4 @@ app.include_router(analytics_router)
 app.include_router(pdf_router)
 
 create_tables()
-
+ingest_knowledge_base()

@@ -31,7 +31,7 @@ if not st.session_state["logged_in"]:
 
 else:
     st.title("Admin Dashboard")
-    API_BASE_URL = "http://127.0.0.1:8000"
+    API_BASE_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:8000")
     data = requests.get(f"{API_BASE_URL}/api/analytics/summary").json()
     st.header("Total students:")
     st.write(data["total_students"])
