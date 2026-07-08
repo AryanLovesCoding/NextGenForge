@@ -3,7 +3,7 @@ import os
 import requests
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from streamlit_tags import st_tags
-from backend.services.assessment import assessment_scores, calculate_scores
+from backend.services.assessment import calculate_scores
 from backend.services.gemini_services import get_chat_response
 import streamlit as st
 from data.questions import questions

@@ -3,7 +3,10 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from data.questions import questions
-from backend.services.assessment import calculate_scores, assessment_scores
+from backend.services.assessment import calculate_scores
+import requests
+
+API_BASE_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:8000")
 
 CARD_COLORS = [
     ("rgba(6,93,255,0.12)", "#4f9bff", "#2a4a7a"),
@@ -63,7 +66,12 @@ def render_results():
     scores = calculate_scores(st.session_state.responses)
     st.session_state.assessment_scores = scores
     # Save assessment scores to database
-    assessment_scores(st.session_state.student_id, scores)
+    requests.post(f"{API_BASE_URL}/api/assessment/{st.session_state.student_id}/save", json={
+        "STEM": scores["STEM"],
+        "Commerce": scores["Commerce"],
+        "Humanities": scores["Humanities"],
+        "creative": scores["Design/Creative Arts"]
+    })
     st.subheader("Your Interest Profile")
     st.caption("Here's how your interests are distributed across different domains.")
     short_scores = {
