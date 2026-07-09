@@ -12,6 +12,7 @@ from backend.routers.pdf_router import router as pdf_router
 from backend.models.create_tables import create_tables
 from backend.services.knowledge_base_service import ingest_knowledge_base
 from slowapi import _rate_limit_exceeded_handler
+from data.populate_colleges import populate_colleges
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 from backend.limiter import limiter
@@ -32,4 +33,5 @@ app.include_router(analytics_router)
 app.include_router(pdf_router)
 
 create_tables()
+populate_colleges()
 threading.Thread(target=ingest_knowledge_base, daemon=True).start()

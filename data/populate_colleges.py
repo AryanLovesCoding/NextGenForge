@@ -67,6 +67,12 @@ colleges = [
 def populate_colleges():
     conn = connect_to_database()
     cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM CollegeComparision")
+    count = cursor.fetchone()[0]
+    if count > 0:
+        print(f"Skipping college population - {count} colleges already in database.")
+        conn.close()
+        return
     sql = """INSERT INTO CollegeComparision (name, stream, city, state, ranking, annual_fees, entrance_exam, placement_average, notable_alumni)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"""
     for college in colleges:
