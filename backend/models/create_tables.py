@@ -15,7 +15,11 @@ def create_tables():
             stream_preference VARCHAR(255),
             interests VARCHAR(255),
             academic_level INTEGER,
-            created_at TEXT
+            created_at TEXT,
+            recommended_stream VARCHAR(255),
+            degree_recommendations TEXT,
+            stream_justification TEXT,
+            roadmap TEXT
         )
     """)
     cursor.execute("""CREATE INDEX IF NOT EXISTS idx_stream_preference ON Student (stream_preference)""")
