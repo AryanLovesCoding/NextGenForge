@@ -73,12 +73,12 @@ def render_results():
         "creative": scores["Design/Creative Arts"]
     })
     st.subheader("Your Interest Profile")
-    st.caption("Here's how your interests are distributed across different domains.")
+    st.caption("Here's how your interests are distributed across different domains (in %).")
     short_scores = {
-        "STEM": scores["STEM"],
-        "Commerce": scores["Commerce"],
-        "Humanities": scores["Humanities"],
-        "Creative": scores["Design/Creative Arts"]
+        "STEM": scores["STEM"] * 100,
+        "Commerce": scores["Commerce"] * 100,
+        "Humanities": scores["Humanities"] * 100,
+        "Creative": scores["Design/Creative Arts"] * 100
     }
     st.bar_chart(short_scores, horizontal=True, height=400)
     st.markdown("<br>", unsafe_allow_html=True)

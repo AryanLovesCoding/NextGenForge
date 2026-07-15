@@ -19,7 +19,7 @@ def create_scores_chart(scores: dict) -> io.BytesIO:
     domains = list(scores.keys())
     values = list(scores.values())
 
-    bar_colors = ['#065dff' if v >= 0.7 else '#4F8BF9' if v >= 0.4 else '#A9C6F5' for v in values]
+    bar_colors = ['#065dff' if v >= 70 else '#4F8BF9' if v >= 40 else '#A9C6F5' for v in values]
 
     fig, ax = plt.subplots(figsize=(6, 3))
     fig.patch.set_facecolor('#FAFBFF')
@@ -34,8 +34,8 @@ def create_scores_chart(scores: dict) -> io.BytesIO:
     ax.xaxis.grid(True, color='#E5E9F5', linewidth=0.8, zorder=0)
     ax.set_axisbelow(True)
 
-    ax.set_xlim(0, 1)
-    ax.set_xlabel('Score', fontsize=10, color='#555555', fontfamily='sans-serif')
+    ax.set_xlim(0, 100)
+    ax.set_xlabel('Match (%)', fontsize=10, color='#555555', fontfamily='sans-serif')
     ax.set_title('Interest Profile', fontsize=14, color='#1a1a2e', fontweight='bold',
                  fontfamily='serif', pad=14)
     ax.tick_params(axis='both', labelsize=10, colors='#333333')
@@ -45,7 +45,7 @@ def create_scores_chart(scores: dict) -> io.BytesIO:
         label.set_fontfamily('sans-serif')
 
     for bar, value in zip(bars, values):
-        ax.text(value + 0.02, bar.get_y() + bar.get_height()/2, f"{value:.2f}",
+        ax.text(value + 2, bar.get_y() + bar.get_height()/2, f"{value:.0f}%",
                 va='center', fontsize=9, color='#333333', fontfamily='sans-serif')
 
     plt.tight_layout()
@@ -155,12 +155,12 @@ def generate_report(student_id: int) -> io.BytesIO:
     # Student Profile
     story.append(Paragraph("Student Profile", heading_style))
     profile_data = [
-        ['Name', name],
-        ['City', city],
-        ['Stream Preference', stream_preference],
-        ['Academic Level', f"{academic_level}%"],
-        ['Interests', interests],
-        ['Recommended Stream', recommended_stream],
+        ['Name', Paragraph(str(name), body_style)],
+        ['City', Paragraph(str(city), body_style)],
+        ['Stream Preference', Paragraph(str(stream_preference), body_style)],
+        ['Academic Level', Paragraph(f"{academic_level}%", body_style)],
+        ['Interests', Paragraph(str(interests), body_style)],
+        ['Recommended Stream', Paragraph(str(recommended_stream), body_style)],
     ]
     profile_table = Table(profile_data, colWidths=[2*inch, 4.5*inch])
     profile_table.setStyle(TableStyle([
@@ -171,6 +171,7 @@ def generate_report(student_id: int) -> io.BytesIO:
         ('PADDING', (0, 0), (-1, -1), 8),
         ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
         ('ROWBACKGROUNDS', (0, 0), (-1, -1), [colors.white, colors.HexColor('#F8F9FF')]),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
     ]))
     story.append(profile_table)
     story.append(Spacer(1, 16))
@@ -183,10 +184,10 @@ def generate_report(student_id: int) -> io.BytesIO:
     story.append(Spacer(1, 8))
 
     if scores:
-        score_data = [['Domain', 'Score (0–1)', 'Level']]
+        score_data = [['Domain', 'Match (%)', 'Level']]
         for domain, score in scores.items():
             level = 'High' if score >= 0.7 else 'Medium' if score >= 0.4 else 'Low'
-            score_data.append([domain, f"{score:.2f}", level])
+            score_data.append([domain, f"{score*100:.0f}%", level])
         score_table = Table(score_data, colWidths=[3*inch, 1.75*inch, 1.75*inch])
         score_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4F8BF9')),
@@ -198,7 +199,7 @@ def generate_report(student_id: int) -> io.BytesIO:
             ('ROWBACKGROUNDS', (1, 0), (-1, -1), [colors.white, colors.HexColor('#F8F9FF')]),
             ('ALIGN', (1, 0), (-1, -1), 'CENTER'),
         ]))
-        chart_buffer = create_scores_chart(scores)
+        chart_buffer = create_scores_chart({k: v * 100 for k, v in scores.items()})
         story.append(Image(chart_buffer, width=5*inch, height=2.5*inch))
 
     story.append(PageBreak())

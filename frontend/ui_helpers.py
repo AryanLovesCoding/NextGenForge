@@ -82,10 +82,20 @@ def inject_custom_css():
         }
 
         /* Headers - unified bold, tight, big look across all pages */
-        h1, h2, h3 {
+        h1 {
             font-weight: 800 !important;
             letter-spacing: -1px !important;
             font-size: 2.8rem !important;
+        }
+        h2 {
+            font-weight: 700 !important;
+            letter-spacing: -0.5px !important;
+            font-size: 2rem !important;
+        }
+        h3 {
+            font-weight: 600 !important;
+            font-size: 1.1rem !important;
+            opacity: 0.9;
         }
 
         .stCaption {

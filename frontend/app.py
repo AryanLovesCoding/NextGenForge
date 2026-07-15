@@ -299,13 +299,13 @@ elif st.session_state.step == 7:
         st.header("Recommended Degrees")
         for degree in res['degrees']:
             with st.expander(degree['degree_name']):
-                st.subheader("Description:")
+                st.markdown("**Description**")
                 st.markdown(degree['description'])
-                st.subheader("Career Pathways:")
+                st.markdown("**Career Pathways**")
                 st.markdown(", ".join(degree['career_pathways']))
-                st.subheader("Entrance Exams:")
+                st.markdown("**Entrance Exams**")
                 st.markdown(", ".join(degree['entrance_exams']))
-                st.subheader("Timeline:")
+                st.markdown("**Timeline**")
                 st.markdown(degree['timeline'])
     except Exception:
         st.error("Could not get recommendation. Please try again.")
