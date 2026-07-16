@@ -8,8 +8,8 @@ Built by **Aryan Ajmera** as part of the NextGen Forge Technologies AI/ML Intern
 
 ## Live Demo
 
-- **Frontend (Streamlit):** _coming soon_
-- **Backend API (FastAPI + Swagger docs):** _coming soon_
+- **Frontend (Streamlit):** [Frontend URL](https://nextgenforge-frontend.onrender.com)
+- **Backend API (FastAPI + Swagger docs):** [Backend URL](https://nextgenforge-backend.onrender.com)
 
 ---
 
