@@ -128,13 +128,12 @@ def generate_report(student_id: int) -> io.BytesIO:
 
     # ── PAGE 1: HEADER & STUDENT PROFILE ──────────────────────────────────────
 
-    # ── PAGE 1: HEADER & STUDENT PROFILE ──────────────────────────────────────
-
     logo_path = "backend/logo.png"
     logo_img = Image(logo_path, width=0.9*inch, height=0.9*inch)
 
     header_title_block = [
         Paragraph("Personalised Career Report", title_style),
+        Paragraph("Here's what we found out about you, explained simply.", subtitle_style),
     ]
 
     header_table = Table(
@@ -154,6 +153,8 @@ def generate_report(student_id: int) -> io.BytesIO:
 
     # Student Profile
     story.append(Paragraph("Student Profile", heading_style))
+    story.append(Paragraph("Here's a quick summary of what you told us about yourself:", body_style))
+    story.append(Spacer(1, 8))
     profile_data = [
         ['Name', Paragraph(str(name), body_style)],
         ['City', Paragraph(str(city), body_style)],
@@ -177,14 +178,15 @@ def generate_report(student_id: int) -> io.BytesIO:
     story.append(Spacer(1, 16))
 
     # Interest Profile Scores
-    story.append(Paragraph("Interest Profile Scores", heading_style))
+    story.append(Paragraph("What You Enjoy Most", heading_style))
     story.append(Paragraph(
-        "Your interest scores across domains based on the 20-question assessment:",
+        "Based on your answers to our 20 questions, here's how much you enjoy each area. "
+        "A higher percentage means it's a stronger match for you.",
         body_style))
     story.append(Spacer(1, 8))
 
     if scores:
-        score_data = [['Domain', 'Match (%)', 'Level']]
+        score_data = [['Area', 'How Much You Like It', 'Strength']]
         for domain, score in scores.items():
             level = 'High' if score >= 0.7 else 'Medium' if score >= 0.4 else 'Low'
             score_data.append([domain, f"{score*100:.0f}%", level])
@@ -206,19 +208,19 @@ def generate_report(student_id: int) -> io.BytesIO:
 
     # ── PAGE 2: STREAM RECOMMENDATION & DEGREES ───────────────────────────────
 
-    story.append(Paragraph("Stream Recommendation", heading_style))
-    story.append(Paragraph(f"<b>Recommended Stream:</b> {recommended_stream}", body_style))
+    story.append(Paragraph("Your Recommended Stream", heading_style))
+    story.append(Paragraph(f"<b>We think {recommended_stream} could be a great fit for you.</b>", body_style))
     story.append(Spacer(1, 6))
-    story.append(Paragraph("<b>Justification:</b>", body_style))
+    story.append(Paragraph("<b>Here's why:</b>", body_style))
     story.append(Paragraph(justification, body_style))
     story.append(Spacer(1, 16))
 
     story.append(divider())
     story.append(Spacer(1, 14))
 
-    story.append(Paragraph("Top 3 Recommended Degree Pathways", heading_style))
+    story.append(Paragraph("3 Degree Options Worth Exploring", heading_style))
     story.append(Paragraph(
-        "Based on your interest profile and recommended stream, the following degree programmes are most suited for you:",
+        "Based on everything you told us, here are three degree paths that could work well for you:",
         body_style))
     story.append(Spacer(1, 10))
 
@@ -227,10 +229,10 @@ def generate_report(student_id: int) -> io.BytesIO:
             story.append(Paragraph(f"{i}. {degree.get('degree_name', 'N/A')}", subheading_style))
             story.append(Paragraph(degree.get('description', ''), body_style))
             career_paths = ', '.join(degree.get('career_pathways', []))
-            story.append(Paragraph(f"<b>Career Pathways:</b> {career_paths}", body_style))
+            story.append(Paragraph(f"<b>Jobs this can lead to:</b> {career_paths}", body_style))
             exams = ', '.join(degree.get('entrance_exams', []))
-            story.append(Paragraph(f"<b>Entrance Exams:</b> {exams}", body_style))
-            story.append(Paragraph(f"<b>Timeline:</b> {degree.get('timeline', 'N/A')}", body_style))
+            story.append(Paragraph(f"<b>Exams you'll need:</b> {exams}", body_style))
+            story.append(Paragraph(f"<b>How long it takes:</b> {degree.get('timeline', 'N/A')}", body_style))
             story.append(Spacer(1, 10))
     else:
         story.append(Paragraph("Degree recommendations not yet generated.", body_style))
@@ -239,38 +241,39 @@ def generate_report(student_id: int) -> io.BytesIO:
 
     # ── PAGE 3: CAREER ROADMAP ─────────────────────────────────────────────────
 
-    story.append(Paragraph("AI-Generated Career Roadmap", heading_style))
+    story.append(Paragraph("Your Step-by-Step Roadmap", heading_style))
+    story.append(Paragraph("Here's a simple plan to help you get there, one stage at a time.", body_style))
     story.append(Spacer(1, 8))
 
     if roadmap:
-        story.append(Paragraph("Class 11–12 Preparation", subheading_style))
+        story.append(Paragraph("Right Now: Class 11 & 12", subheading_style))
         story.append(Paragraph(roadmap.get('class_11_12_preparation', ''), body_style))
         story.append(Spacer(1, 8))
 
-        story.append(Paragraph("Entrance Exam Timeline", subheading_style))
+        story.append(Paragraph("Exams to Prepare For", subheading_style))
         for exam in roadmap.get('entrance_exam_timeline', []):
             story.append(Paragraph(
                 f"<b>{exam.get('exam', '')}:</b> {exam.get('when', '')} — {exam.get('preparation_tip', '')}",
                 body_style))
         story.append(Spacer(1, 8))
 
-        story.append(Paragraph("Undergraduate Milestones", subheading_style))
+        story.append(Paragraph("Your College Years", subheading_style))
         for milestone in roadmap.get('undergraduate_milestones', []):
             story.append(Paragraph(
                 f"<b>{milestone.get('year', '')}:</b> {milestone.get('focus', '')}. {milestone.get('goals', '')}",
                 body_style))
         story.append(Spacer(1, 8))
 
-        story.append(Paragraph("Key Skills to Develop", subheading_style))
+        story.append(Paragraph("Skills Worth Building", subheading_style))
         skills = ', '.join(roadmap.get('skill_development', []))
         story.append(Paragraph(skills, body_style))
         story.append(Spacer(1, 8))
 
-        story.append(Paragraph("Internship Milestones", subheading_style))
+        story.append(Paragraph("Internships to Aim For", subheading_style))
         story.append(Paragraph(roadmap.get('internship_milestones', ''), body_style))
         story.append(Spacer(1, 8))
 
-        story.append(Paragraph("Industry Entry Pathway", subheading_style))
+        story.append(Paragraph("Starting Your Career", subheading_style))
         story.append(Paragraph(roadmap.get('industry_entry_pathway', ''), body_style))
     else:
         story.append(Paragraph("Career roadmap not yet generated. Please complete the roadmap step first.", body_style))
@@ -279,7 +282,7 @@ def generate_report(student_id: int) -> io.BytesIO:
 
     # ── PAGE 4: NEXT STEPS ACTION PLAN ────────────────────────────────────────
 
-    story.append(Paragraph("Personalised Next Steps Action Plan", heading_style))
+    story.append(Paragraph("What to Do Next", heading_style))
     story.append(Spacer(1, 8))
 
     interests_list = interests.split(', ') if interests else []
